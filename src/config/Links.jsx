@@ -1,21 +1,30 @@
+import {
+  FaHome,
+  FaHandsHelping,
+  FaHandHoldingHeart,
+  FaMoneyBillWave,
+  FaBlog,
+  FaTachometerAlt,
+  FaUser
+} from "react-icons/fa";
 export const preLoginLinks = [
   {
     id: 1,
     name: "Home",
     path: "/",
-    icon: <FaHome />
+    icon: <FaHome />,
   },
   {
     id: 2,
     name: "Donation Requests",
     path: "/donations",
-    icon: <FaHandsHelping /> || <FaHandHoldingHeart />
+    icon: <FaHandsHelping /> || <FaHandHoldingHeart />,
   },
   {
     id: 3,
     name: "Blog",
     path: "/blog",
-    icon: <FaBlog />
+    icon: <FaBlog />,
   },
 ];
 
@@ -24,25 +33,25 @@ export const postLoginLinks = [
     id: 1,
     name: "Home",
     path: "/",
-    icon: <FaHome />
+    icon: <FaHome />,
   },
   {
     id: 2,
     name: "Donation Requests",
     path: "/donations",
-    icon: <FaHandsHelping /> || <FaHandHoldingHeart />
+    icon: <FaHandsHelping /> || <FaHandHoldingHeart />,
   },
   {
     id: 3,
     name: "Funding",
     path: "/funding",
-    icon: <FaMoneyBillWave />
+    icon: <FaMoneyBillWave />,
   },
   {
     id: 4,
     name: "Blog",
     path: "/blog",
-    icon: <FaBlog />
+    icon: <FaBlog />,
   },
 ];
 
@@ -58,10 +67,5 @@ export const userDropdownLinks = [
     name: "Profile",
     path: "/profile",
     icon: <FaUser />,
-  },
-  {
-    id: 3,
-    name: "Logout",
-    icon: <FaSignOutAlt />,
   }
-]
+];
