@@ -5,7 +5,7 @@ const ErrorPage = () => {
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex flex-col items-center justify-center p-4 text-center">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 space-y-6">
+      <div className="max-w-xl w-full bg-white rounded-lg shadow-lg p-8 space-y-6">
         {/* Blood drop icon */}
         <div className="mx-auto w-20 h-20 bg-red-100 rounded-full flex items-center justify-center">
           <svg 
@@ -26,7 +26,7 @@ const ErrorPage = () => {
           {error.status || "Oops!"}
         </h1>
         
-        <h2 className="text-xl font-semibold text-gray-800">
+        <h2 className="font-semibold text-gray-800">
           {error.statusText || error.message || "Something went wrong"}
         </h2>
         

@@ -12,6 +12,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.74.7",
     "formik": "^2.4.6",
+    "motion": "^12.9.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",

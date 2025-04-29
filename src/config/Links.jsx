@@ -1,30 +1,30 @@
 import {
-  FaHome,
   FaHandsHelping,
-  FaHandHoldingHeart,
-  FaMoneyBillWave,
   FaBlog,
-  FaTachometerAlt,
-  FaUser
+  FaUser,
+  FaMoneyCheckAlt 
 } from "react-icons/fa";
+import { RiHomeHeartLine } from "react-icons/ri";
+import { MdSpaceDashboard } from "react-icons/md";
+
 export const preLoginLinks = [
   {
     id: 1,
     name: "Home",
     path: "/",
-    icon: <FaHome />,
+    icon: RiHomeHeartLine,
   },
   {
     id: 2,
     name: "Donation Requests",
     path: "/donations",
-    icon: <FaHandsHelping /> || <FaHandHoldingHeart />,
+    icon: FaHandsHelping,
   },
   {
     id: 3,
     name: "Blog",
     path: "/blog",
-    icon: <FaBlog />,
+    icon: FaBlog,
   },
 ];
 
@@ -33,25 +33,25 @@ export const postLoginLinks = [
     id: 1,
     name: "Home",
     path: "/",
-    icon: <FaHome />,
+    icon: RiHomeHeartLine,
   },
   {
     id: 2,
     name: "Donation Requests",
     path: "/donations",
-    icon: <FaHandsHelping /> || <FaHandHoldingHeart />,
+    icon: FaHandsHelping,
   },
   {
     id: 3,
     name: "Funding",
     path: "/funding",
-    icon: <FaMoneyBillWave />,
+    icon: FaMoneyCheckAlt ,
   },
   {
     id: 4,
     name: "Blog",
     path: "/blog",
-    icon: <FaBlog />,
+    icon: FaBlog,
   },
 ];
 
@@ -60,12 +60,12 @@ export const userDropdownLinks = [
     id: 1,
     name: "Dashboard",
     path: "/dashboard",
-    icon: <FaTachometerAlt />,
+    icon: MdSpaceDashboard,
   },
   {
     id: 2,
     name: "Profile",
     path: "/profile",
-    icon: <FaUser />,
+    icon: FaUser,
   }
 ];
