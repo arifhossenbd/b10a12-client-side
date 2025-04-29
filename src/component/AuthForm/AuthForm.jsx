@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { motion } from "framer-motion";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import {
@@ -12,10 +12,12 @@ import {
   FaEyeSlash,
   FaSpinner,
   FaHeartbeat,
+  FaCheckCircle,
 } from "react-icons/fa";
 import { useMemo, useState } from "react";
 import { useLocalData } from "../../hooks/useLocalData";
 import { Link } from "react-router";
+import PrimaryBtn from "../../Buttons/PrimaryBtn";
 
 // Color scheme constants
 const COLORS = {
@@ -48,6 +50,7 @@ const cardVariants = {
 const buttonVariants = {
   hover: {
     scale: 1.02,
+    backgroundColor: COLORS.primaryHover,
     transition: {
       duration: 0.2,
     },
@@ -65,6 +68,14 @@ const pulseVariants = {
       repeat: Infinity,
       repeatType: "reverse",
     },
+  },
+};
+
+const fieldFocusVariants = {
+  focus: {
+    boxShadow: `0 0 0 2px ${COLORS.primary}40`,
+    borderColor: COLORS.primary,
+    transition: { duration: 0.2 },
   },
 };
 
@@ -88,7 +99,7 @@ const AuthForm = ({ type = "login", onSubmit, user }) => {
       division: Yup.string().required("Division is required"),
       district: Yup.string().required("District is required"),
       upazila: Yup.string().required("Upazila is required"),
-      image: Yup.string().required("Image is required"),
+      image: Yup.mixed().required("Profile picture is required"),
       confirmPassword: Yup.string()
         .oneOf([Yup.ref("password"), null], "Passwords must match")
         .required("Confirm Password is required"),
@@ -195,31 +206,44 @@ const AuthForm = ({ type = "login", onSubmit, user }) => {
                         >
                           Full Name
                         </label>
-                        <div className="relative">
-                          <Field
-                            name="name"
-                            type="text"
-                            className="w-full p-2 pl-10 border rounded"
-                            placeholder="Enter your full name"
-                            style={{
-                              borderColor:
-                                errors.name && touched.name
-                                  ? COLORS.error
-                                  : COLORS.border,
-                              color: COLORS.textPrimary,
-                            }}
-                          />
-                          <FaUser
-                            className="absolute left-3 top-3"
-                            style={{ color: COLORS.icon }}
-                          />
-                        </div>
+                        <motion.div
+                          whileFocus="focus"
+                          variants={fieldFocusVariants}
+                        >
+                          <div className="relative">
+                            <Field
+                              name="name"
+                              type="text"
+                              className="w-full p-2 pl-10 border rounded focus:outline-none"
+                              placeholder="Enter your full name"
+                              style={{
+                                borderColor:
+                                  errors.name && touched.name
+                                    ? COLORS.error
+                                    : !errors.name && touched.name
+                                    ? COLORS.success
+                                    : COLORS.border,
+                                color: COLORS.textPrimary,
+                              }}
+                            />
+                            <FaUser
+                              className="absolute left-3 top-3"
+                              style={{ color: COLORS.icon }}
+                            />
+                          </div>
+                        </motion.div>
                         <ErrorMessage
                           name="name"
                           component="div"
                           className="text-sm mt-1"
                           style={{ color: COLORS.error }}
                         />
+                        {!errors.name && touched.name && (
+                          <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                            <FaCheckCircle />
+                            <span>Name looks good</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Blood Group */}
@@ -231,37 +255,50 @@ const AuthForm = ({ type = "login", onSubmit, user }) => {
                         >
                           Blood Group
                         </label>
-                        <div className="relative">
-                          <Field
-                            as="select"
-                            name="bloodGroup"
-                            className="w-full p-2 pl-10 border rounded"
-                            style={{
-                              borderColor:
-                                errors.bloodGroup && touched.bloodGroup
-                                  ? COLORS.error
-                                  : COLORS.border,
-                              color: COLORS.textPrimary,
-                            }}
-                          >
-                            <option value="">Select Blood Group</option>
-                            {bloodGroups?.map((group) => (
-                              <option key={group} value={group}>
-                                {group}
-                              </option>
-                            ))}
-                          </Field>
-                          <FaTint
-                            className="absolute left-3 top-3"
-                            style={{ color: COLORS.icon }}
-                          />
-                        </div>
+                        <motion.div
+                          whileFocus="focus"
+                          variants={fieldFocusVariants}
+                        >
+                          <div className="relative">
+                            <Field
+                              as="select"
+                              name="bloodGroup"
+                              className="w-full p-2 pl-10 border rounded focus:outline-none"
+                              style={{
+                                borderColor:
+                                  errors.bloodGroup && touched.bloodGroup
+                                    ? COLORS.error
+                                    : !errors.bloodGroup && touched.bloodGroup
+                                    ? COLORS.success
+                                    : COLORS.border,
+                                color: COLORS.textPrimary,
+                              }}
+                            >
+                              <option value="">Select Blood Group</option>
+                              {bloodGroups?.map((group) => (
+                                <option key={group} value={group}>
+                                  {group}
+                                </option>
+                              ))}
+                            </Field>
+                            <FaTint
+                              className="absolute left-3 top-3"
+                              style={{ color: COLORS.icon }}
+                            />
+                          </div>
+                        </motion.div>
                         <ErrorMessage
                           name="bloodGroup"
                           component="div"
                           className="text-sm mt-1"
                           style={{ color: COLORS.error }}
                         />
+                        {!errors.bloodGroup && touched.bloodGroup && (
+                          <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                            <FaCheckCircle />
+                            <span>Blood group selected</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* Division Field */}
@@ -273,45 +310,58 @@ const AuthForm = ({ type = "login", onSubmit, user }) => {
                         >
                           Division
                         </label>
-                        <div className="relative">
-                          <Field
-                            as="select"
-                            name="division"
-                            className="w-full p-2 pl-10 border rounded"
-                            style={{
-                              borderColor:
-                                errors.division && touched.division
-                                  ? COLORS.error
-                                  : COLORS.border,
-                              color: COLORS.textPrimary,
-                            }}
-                            onChange={(e) => {
-                              setFieldValue("division", e.target.value);
-                              setFieldValue("district", "");
-                              setFieldValue("upazila", "");
-                            }}
-                          >
-                            <option value="">Select Division</option>
-                            {divisions?.map((division) => (
-                              <option
-                                key={division.id}
-                                value={division.en_name || division.name}
-                              >
-                                {division.en_name || division.name}
-                              </option>
-                            ))}
-                          </Field>
-                          <FaMapMarkedAlt
-                            className="absolute left-3 top-3"
-                            style={{ color: COLORS.icon }}
-                          />
-                        </div>
+                        <motion.div
+                          whileFocus="focus"
+                          variants={fieldFocusVariants}
+                        >
+                          <div className="relative">
+                            <Field
+                              as="select"
+                              name="division"
+                              className="w-full p-2 pl-10 border rounded focus:outline-none"
+                              style={{
+                                borderColor:
+                                  errors.division && touched.division
+                                    ? COLORS.error
+                                    : !errors.division && touched.division
+                                    ? COLORS.success
+                                    : COLORS.border,
+                                color: COLORS.textPrimary,
+                              }}
+                              onChange={(e) => {
+                                setFieldValue("division", e.target.value);
+                                setFieldValue("district", "");
+                                setFieldValue("upazila", "");
+                              }}
+                            >
+                              <option value="">Select Division</option>
+                              {divisions?.map((division) => (
+                                <option
+                                  key={division.id}
+                                  value={division.en_name || division.name}
+                                >
+                                  {division.en_name || division.name}
+                                </option>
+                              ))}
+                            </Field>
+                            <FaMapMarkedAlt
+                              className="absolute left-3 top-3"
+                              style={{ color: COLORS.icon }}
+                            />
+                          </div>
+                        </motion.div>
                         <ErrorMessage
                           name="division"
                           component="div"
                           className="text-sm mt-1"
                           style={{ color: COLORS.error }}
                         />
+                        {!errors.division && touched.division && (
+                          <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                            <FaCheckCircle />
+                            <span>Division selected</span>
+                          </div>
+                        )}
                       </div>
 
                       {/* District Field */}
@@ -324,44 +374,57 @@ const AuthForm = ({ type = "login", onSubmit, user }) => {
                           >
                             District
                           </label>
-                          <div className="relative">
-                            <Field
-                              as="select"
-                              name="district"
-                              className="w-full p-2 pl-10 border rounded"
-                              style={{
-                                borderColor:
-                                  errors.district && touched.district
-                                    ? COLORS.error
-                                    : COLORS.border,
-                                color: COLORS.textPrimary,
-                              }}
-                              onChange={(e) => {
-                                setFieldValue("district", e.target.value);
-                                setFieldValue("upazila", "");
-                              }}
-                            >
-                              <option value="">Select District</option>
-                              {filteredDistrictsResult?.map((district) => (
-                                <option
-                                  key={district.id}
-                                  value={district.en_name || district.name}
-                                >
-                                  {district.en_name || district.name}
-                                </option>
-                              ))}
-                            </Field>
-                            <FaMapMarkedAlt
-                              className="absolute left-3 top-3"
-                              style={{ color: COLORS.icon }}
-                            />
-                          </div>
+                          <motion.div
+                            whileFocus="focus"
+                            variants={fieldFocusVariants}
+                          >
+                            <div className="relative">
+                              <Field
+                                as="select"
+                                name="district"
+                                className="w-full p-2 pl-10 border rounded focus:outline-none"
+                                style={{
+                                  borderColor:
+                                    errors.district && touched.district
+                                      ? COLORS.error
+                                      : !errors.district && touched.district
+                                      ? COLORS.success
+                                      : COLORS.border,
+                                  color: COLORS.textPrimary,
+                                }}
+                                onChange={(e) => {
+                                  setFieldValue("district", e.target.value);
+                                  setFieldValue("upazila", "");
+                                }}
+                              >
+                                <option value="">Select District</option>
+                                {filteredDistrictsResult?.map((district) => (
+                                  <option
+                                    key={district.id}
+                                    value={district.en_name || district.name}
+                                  >
+                                    {district.en_name || district.name}
+                                  </option>
+                                ))}
+                              </Field>
+                              <FaMapMarkedAlt
+                                className="absolute left-3 top-3"
+                                style={{ color: COLORS.icon }}
+                              />
+                            </div>
+                          </motion.div>
                           <ErrorMessage
                             name="district"
                             component="div"
                             className="text-sm mt-1"
                             style={{ color: COLORS.error }}
                           />
+                          {!errors.district && touched.district && (
+                            <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                              <FaCheckCircle />
+                              <span>District selected</span>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -375,40 +438,53 @@ const AuthForm = ({ type = "login", onSubmit, user }) => {
                           >
                             Upazila
                           </label>
-                          <div className="relative">
-                            <Field
-                              as="select"
-                              name="upazila"
-                              className="w-full p-2 pl-10 border rounded"
-                              style={{
-                                borderColor:
-                                  errors.upazila && touched.upazila
-                                    ? COLORS.error
-                                    : COLORS.border,
-                                color: COLORS.textPrimary,
-                              }}
-                            >
-                              <option value="">Select Upazila</option>
-                              {filteredUpazilasResult?.map((upazila) => (
-                                <option
-                                  key={upazila.id}
-                                  value={upazila.en_name || upazila.name}
-                                >
-                                  {upazila.en_name || upazila.name}
-                                </option>
-                              ))}
-                            </Field>
-                            <FaMapMarkedAlt
-                              className="absolute left-3 top-3"
-                              style={{ color: COLORS.icon }}
-                            />
-                          </div>
+                          <motion.div
+                            whileFocus="focus"
+                            variants={fieldFocusVariants}
+                          >
+                            <div className="relative">
+                              <Field
+                                as="select"
+                                name="upazila"
+                                className="w-full p-2 pl-10 border rounded focus:outline-none"
+                                style={{
+                                  borderColor:
+                                    errors.upazila && touched.upazila
+                                      ? COLORS.error
+                                      : !errors.upazila && touched.upazila
+                                      ? COLORS.success
+                                      : COLORS.border,
+                                  color: COLORS.textPrimary,
+                                }}
+                              >
+                                <option value="">Select Upazila</option>
+                                {filteredUpazilasResult?.map((upazila) => (
+                                  <option
+                                    key={upazila.id}
+                                    value={upazila.en_name || upazila.name}
+                                  >
+                                    {upazila.en_name || upazila.name}
+                                  </option>
+                                ))}
+                              </Field>
+                              <FaMapMarkedAlt
+                                className="absolute left-3 top-3"
+                                style={{ color: COLORS.icon }}
+                              />
+                            </div>
+                          </motion.div>
                           <ErrorMessage
                             name="upazila"
                             component="div"
                             className="text-sm mt-1"
                             style={{ color: COLORS.error }}
                           />
+                          {!errors.upazila && touched.upazila && (
+                            <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                              <FaCheckCircle />
+                              <span>Upazila selected</span>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -421,35 +497,51 @@ const AuthForm = ({ type = "login", onSubmit, user }) => {
                         >
                           Profile Picture
                         </label>
-                        <div className="relative">
-                          <input
-                            id="image"
-                            name="image"
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              setFieldValue("image", e.currentTarget.files[0]);
-                            }}
-                            className="w-full p-2 pl-10 border rounded"
-                            style={{
-                              borderColor:
-                                errors.image && touched.image
-                                  ? COLORS.error
-                                  : COLORS.border,
-                              color: COLORS.textPrimary,
-                            }}
-                          />
-                          <FaImage
-                            className="absolute left-3 top-3"
-                            style={{ color: COLORS.icon }}
-                          />
-                        </div>
+                        <motion.div
+                          whileFocus="focus"
+                          variants={fieldFocusVariants}
+                        >
+                          <div className="relative">
+                            <input
+                              id="image"
+                              name="image"
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => {
+                                setFieldValue(
+                                  "image",
+                                  e.currentTarget.files[0]
+                                );
+                              }}
+                              className="w-full p-2 pl-10 border rounded focus:outline-none"
+                              style={{
+                                borderColor:
+                                  errors.image && touched.image
+                                    ? COLORS.error
+                                    : !errors.image && touched.image
+                                    ? COLORS.success
+                                    : COLORS.border,
+                                color: COLORS.textPrimary,
+                              }}
+                            />
+                            <FaImage
+                              className="absolute left-3 top-3"
+                              style={{ color: COLORS.icon }}
+                            />
+                          </div>
+                        </motion.div>
                         <ErrorMessage
                           name="image"
                           component="div"
                           className="text-sm mt-1"
                           style={{ color: COLORS.error }}
                         />
+                        {!errors.image && touched.image && (
+                          <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                            <FaCheckCircle />
+                            <span>Image selected</span>
+                          </div>
+                        )}
                       </div>
                     </>
                   )}
@@ -463,31 +555,44 @@ const AuthForm = ({ type = "login", onSubmit, user }) => {
                     >
                       Email
                     </label>
-                    <div className="relative">
-                      <Field
-                        name="email"
-                        type="email"
-                        className="w-full p-2 pl-10 border rounded"
-                        placeholder="Enter your email"
-                        style={{
-                          borderColor:
-                            errors.email && touched.email
-                              ? COLORS.error
-                              : COLORS.border,
-                          color: COLORS.textPrimary,
-                        }}
-                      />
-                      <FaEnvelope
-                        className="absolute left-3 top-3"
-                        style={{ color: COLORS.icon }}
-                      />
-                    </div>
+                    <motion.div
+                      whileFocus="focus"
+                      variants={fieldFocusVariants}
+                    >
+                      <div className="relative">
+                        <Field
+                          name="email"
+                          type="email"
+                          className="w-full p-2 pl-10 border rounded focus:outline-none"
+                          placeholder="Enter your email"
+                          style={{
+                            borderColor:
+                              errors.email && touched.email
+                                ? COLORS.error
+                                : !errors.email && touched.email
+                                ? COLORS.success
+                                : COLORS.border,
+                            color: COLORS.textPrimary,
+                          }}
+                        />
+                        <FaEnvelope
+                          className="absolute left-3 top-3"
+                          style={{ color: COLORS.icon }}
+                        />
+                      </div>
+                    </motion.div>
                     <ErrorMessage
                       name="email"
                       component="div"
                       className="text-sm mt-1"
                       style={{ color: COLORS.error }}
                     />
+                    {!errors.email && touched.email && (
+                      <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                        <FaCheckCircle />
+                        <span>Email looks good</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Password Field */}
@@ -499,80 +604,26 @@ const AuthForm = ({ type = "login", onSubmit, user }) => {
                     >
                       Password
                     </label>
-                    <div className="relative">
-                      <Field
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        className="w-full p-2 pl-10 border rounded"
-                        placeholder={
-                          type === "login"
-                            ? "Enter your password"
-                            : "Create a password"
-                        }
-                        style={{
-                          borderColor:
-                            errors.password && touched.password
-                              ? COLORS.error
-                              : COLORS.border,
-                          color: COLORS.textPrimary,
-                        }}
-                      />
-                      <FaLock
-                        className="absolute left-3 top-3"
-                        style={{ color: COLORS.icon }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xl md:text-2xl"
-                        style={{ color: COLORS.icon }}
-                      >
-                        {showPassword ? <FaEyeSlash /> : <FaEye />}
-                      </button>
-                    </div>
-                    <ErrorMessage
-                      name="password"
-                      component="div"
-                      className="text-sm mt-1"
-                      style={{ color: COLORS.error }}
-                    />
-                    {type === "register" && (
-                      <div
-                        className="text-xs mt-1"
-                        style={{ color: COLORS.textSecondary }}
-                      >
-                        Password must contain:
-                        <ul className="list-disc pl-5">
-                          <li>At least 6 characters</li>
-                          <li>One uppercase letter</li>
-                          <li>One lowercase letter</li>
-                          <li>One number</li>
-                          <li>One special character (~!@#$%^&*)</li>
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Confirm Password */}
-                  {type === "register" && (
-                    <div className="font-group">
-                      <label
-                        htmlFor="confirmPassword"
-                        className="block mb-1 font-medium"
-                        style={{ color: COLORS.textPrimary }}
-                      >
-                        Confirm Password
-                      </label>
+                    <motion.div
+                      whileFocus="focus"
+                      variants={fieldFocusVariants}
+                    >
                       <div className="relative">
                         <Field
-                          name="confirmPassword"
+                          name="password"
                           type={showPassword ? "text" : "password"}
-                          className="w-full p-2 pl-10 border rounded"
-                          placeholder="Confirm your password"
+                          className="w-full p-2 pl-10 border rounded focus:outline-none"
+                          placeholder={
+                            type === "login"
+                              ? "Enter your password"
+                              : "Create a password"
+                          }
                           style={{
                             borderColor:
-                              errors.confirmPassword && touched.confirmPassword
+                              errors.password && touched.password
                                 ? COLORS.error
+                                : !errors.password && touched.password
+                                ? COLORS.success
                                 : COLORS.border,
                             color: COLORS.textPrimary,
                           }}
@@ -590,30 +641,113 @@ const AuthForm = ({ type = "login", onSubmit, user }) => {
                           {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </button>
                       </div>
+                    </motion.div>
+                    <ErrorMessage
+                      name="password"
+                      component="div"
+                      className="text-sm mt-1"
+                      style={{ color: COLORS.error }}
+                    />
+                    {type === "register" && values.password && (
+                      <div className="mt-1">
+                        <div className="flex items-center gap-2 text-xs">
+                          <span style={{ color: COLORS.textSecondary }}>
+                            Password strength:
+                          </span>
+                          <div className="flex-1 bg-gray-200 rounded-full h-1.5">
+                            <div
+                              className={`h-1.5 rounded-full ${
+                                values.password.length >= 8 &&
+                                /[A-Z]/.test(values.password) &&
+                                /[a-z]/.test(values.password) &&
+                                /\d/.test(values.password) &&
+                                /[~!@#$%^&*]/.test(values.password)
+                                  ? "bg-green-500"
+                                  : values.password.length >= 6
+                                  ? "bg-yellow-500"
+                                  : "bg-red-500"
+                              }`}
+                              style={{
+                                width: `${
+                                  values.password.length >= 8 &&
+                                  /[A-Z]/.test(values.password) &&
+                                  /[a-z]/.test(values.password) &&
+                                  /\d/.test(values.password) &&
+                                  /[~!@#$%^&*]/.test(values.password)
+                                    ? "100"
+                                    : values.password.length >= 6
+                                    ? "60"
+                                    : "30"
+                                }%`,
+                              }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Confirm Password */}
+                  {type === "register" && (
+                    <div className="font-group">
+                      <label
+                        htmlFor="confirmPassword"
+                        className="block mb-1 font-medium"
+                        style={{ color: COLORS.textPrimary }}
+                      >
+                        Confirm Password
+                      </label>
+                      <motion.div
+                        whileFocus="focus"
+                        variants={fieldFocusVariants}
+                      >
+                        <div className="relative">
+                          <Field
+                            name="confirmPassword"
+                            type={showPassword ? "text" : "password"}
+                            className="w-full p-2 pl-10 border rounded focus:outline-none"
+                            placeholder="Confirm your password"
+                            style={{
+                              borderColor:
+                                errors.confirmPassword &&
+                                touched.confirmPassword
+                                  ? COLORS.error
+                                  : !errors.confirmPassword &&
+                                    touched.confirmPassword
+                                  ? COLORS.success
+                                  : COLORS.border,
+                              color: COLORS.textPrimary,
+                            }}
+                          />
+                          <FaLock
+                            className="absolute left-3 top-3"
+                            style={{ color: COLORS.icon }}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-xl md:text-2xl"
+                            style={{ color: COLORS.icon }}
+                          >
+                            {showPassword ? <FaEyeSlash /> : <FaEye />}
+                          </button>
+                        </div>
+                      </motion.div>
                       <ErrorMessage
                         name="confirmPassword"
                         component="div"
                         className="text-sm mt-1"
                         style={{ color: COLORS.error }}
                       />
+                      {!errors.confirmPassword && touched.confirmPassword && (
+                        <div className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                          <FaCheckCircle />
+                          <span>Passwords match</span>
+                        </div>
+                      )}
                     </div>
                   )}
-
-                  <motion.button
-                    type="submit"
-                    disabled={user || isSubmitting}
-                    variants={buttonVariants}
-                    whileHover={!user && !isSubmitting ? "hover" : {}}
-                    whileTap={!user && !isSubmitting ? "tap" : {}}
-                    className="w-full py-2 px-4 rounded flex items-center justify-center transition duration-300 ease-in-out"
-                    style={{
-                      backgroundColor:
-                        user || isSubmitting
-                          ? COLORS.textSecondary
-                          : COLORS.primary,
-                      color: "#FFFFFF",
-                    }}
-                  >
+                  <PrimaryBtn style="w-full flex justify-center" user={user} loading={isSubmitting} toolTipText={"You are already logged in"}>
                     {isSubmitting ? (
                       <div className="flex items-center gap-2">
                         <motion.div
@@ -637,7 +771,7 @@ const AuthForm = ({ type = "login", onSubmit, user }) => {
                     ) : (
                       "Register"
                     )}
-                  </motion.button>
+                  </PrimaryBtn>
 
                   <div
                     className="text-center text-sm mt-4"

@@ -8,6 +8,7 @@ import {
 import { useAuth } from "../../hooks/useAuth";
 import { FaUser, FaSignOutAlt, FaBars, FaTimes } from "react-icons/fa";
 import { FaDroplet } from "react-icons/fa6";
+import PrimaryBtn from "../../Buttons/PrimaryBtn";
 
 const navItemVariants = {
   hover: {
@@ -177,11 +178,13 @@ const Navbar = () => {
                     className="btn btn-ghost btn-circle avatar"
                   >
                     {user?.photoURL ? (
-                      <img
-                        alt="User profile"
-                        src={user.photoURL}
-                        className="w-full h-full object-cover rounded-full"
-                      />
+                      <figure className="w-10 h-10">
+                        <img
+                          alt="User profile"
+                          src={user?.photoURL}
+                          className="object-cover w-full h-full rounded-full"
+                        />
+                      </figure>
                     ) : (
                       <FaUser className="text-red-600 text-lg" />
                     )}
@@ -257,23 +260,17 @@ const Navbar = () => {
                   </AnimatePresence>
                 </div>
               ) : (
-                <motion.div
-                  whileHover="hover"
-                  whileTap="tap"
-                  variants={navItemVariants}
-                >
-                  <Link
-                    to="/login"
-                    className="px-4 py-2 rounded-md text-sm font-medium text-white bg-gradient-to-r from-red-600 to-red-500 shadow-md hover:from-red-700 hover:to-red-600 transition-all duration-200 flex items-center gap-1"
-                  >
-                    <span>Sign in</span>
-                  </Link>
-                </motion.div>
+                <Link to="/login">
+                  <PrimaryBtn type="button" variants={navItemVariants}>
+                    Sign in
+                  </PrimaryBtn>
+                </Link>
               )}
             </div>
           </div>
         </motion.div>
       </div>
+
       {/* Mobile Drawer Sidebar */}
       <div className="drawer-side z-100">
         <label
