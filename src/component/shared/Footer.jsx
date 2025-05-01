@@ -52,7 +52,7 @@ const Footer = () => {
 
   return (
     <footer className="bg-gradient-to-b from-red-50 to-white border-t border-red-200">
-      <div className="px-4 md:w-11/12 lg:w-11/12 mx-auto">
+      <div className="px-4 lg:w-11/12 mx-auto">
         <motion.div
           initial="hidden"
           whileInView="visible"

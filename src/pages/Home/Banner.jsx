@@ -17,14 +17,14 @@ const Banner = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-red-900/95 via-red-800/90 to-red-700/90 rounded-lg" />
 
       <div className="relative z-10 py-12 md:py-16 lg:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center"
-        >
+        <div className="text-center">
           {urgentBloodTypes.length > 0 && (
-            <div className="mb-4 md:mb-6 inline-flex flex-wrap justify-center items-center gap-1 md:gap-2 bg-red-900/80 text-white px-3 py-1 md:px-4 md:py-2 rounded-full border border-red-300/50 animate-pulse text-xs sm:text-sm">
+            <motion.div
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="mb-4 md:mb-6 inline-flex flex-wrap justify-center items-center gap-1 md:gap-2 bg-red-900/80 text-white px-3 py-1 md:px-4 md:py-2 rounded-full border border-red-300/50 animate-pulse text-xs sm:text-sm"
+            >
               <FaTint className="text-red-300" />
               <span className="font-semibold">URGENT NEED:</span>
               {urgentBloodTypes.map((blood, i) => (
@@ -34,30 +34,43 @@ const Banner = () => {
                   {i < urgentBloodTypes.length - 1 ? "," : ""}
                 </span>
               ))}
-            </div>
+            </motion.div>
           )}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold md:font-extrabold text-white mb-4 md:mb-6 leading-snug md:leading-tight">
+          <motion.h1
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.1 }}
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold md:font-extrabold text-white mb-4 md:mb-6 leading-snug md:leading-tight"
+          >
             <span className="bg-clip-text text-transparent bg-gradient-to-r from-red-200 to-white">
               Your Blood Could Be
             </span>
             <br className="hidden sm:block" />
             Someone's Miracle
-          </h1>
+          </motion.h1>
           <div className="max-w-2xl md:max-w-3xl mx-auto">
-            <p className="text-base sm:text-lg md:text-xl text-red-100 mb-8 md:mb-10">
+            <motion.p
+              initial={{ opacity: 0, y: 50 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="text-base sm:text-lg md:text-xl text-red-100 mb-8 md:mb-10"
+            >
               <CountUp
-                end={25684}
+                end={1125684}
                 duration={3}
                 separator=","
                 className="font-semibold md:font-bold text-white"
               />{" "}
               lives saved this year
-            </p>
+            </motion.p>
           </div>
           <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 mb-8 md:mb-12">
             {["A+", "B+", "O+", "AB+"].map((type) => (
               <motion.div
                 key={type}
+                initial={{ opacity: 0, y: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1, delay: 0.5 }}
                 whileHover={{ scale: 1.1 }}
                 className="bg-red-900/60 border border-red-400/30 rounded-full w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 flex items-center justify-center text-white font-bold cursor-default text-sm sm:text-base md:text-lg"
               >
@@ -67,6 +80,9 @@ const Banner = () => {
           </div>
           <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 md:gap-6">
             <motion.button
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => navigate("/register")}
@@ -76,6 +92,9 @@ const Banner = () => {
             </motion.button>
 
             <motion.button
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => navigate("/search")}
@@ -85,15 +104,30 @@ const Banner = () => {
             </motion.button>
           </div>
           <div className="mt-12 md:mt-16 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-red-100 text-xs sm:text-sm">
-            <div className="flex items-center justify-center gap-1 md:gap-2">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex items-center justify-center gap-1 md:gap-2"
+            >
               <FaTint className="text-red-300 text-sm md:text-base" />
               <span>100% Safe</span>
-            </div>
-            <div className="flex items-center justify-center gap-1 md:gap-2">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex items-center justify-center gap-1 md:gap-2"
+            >
               <FaHeartbeat className="text-red-300 text-sm md:text-base" />
               <span>FDA Approved</span>
-            </div>
-            <div className="flex items-center justify-center gap-1 md:gap-2">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex items-center justify-center gap-1 md:gap-2"
+            >
               <svg
                 className="w-3 h-3 md:w-4 md:h-4 text-red-300"
                 fill="currentColor"
@@ -106,8 +140,13 @@ const Banner = () => {
                 />
               </svg>
               <span>Secure Data</span>
-            </div>
-            <div className="flex items-center justify-center gap-1 md:gap-2">
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex items-center justify-center gap-1 md:gap-2"
+            >
               <svg
                 className="w-3 h-3 md:w-4 md:h-4 text-red-300"
                 fill="currentColor"
@@ -120,9 +159,9 @@ const Banner = () => {
                 />
               </svg>
               <span>Quick Process</span>
-            </div>
+            </motion.div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

@@ -33,7 +33,6 @@ const COLORS = {
   border: "#E2E8F0", // Border color
   icon: "#718096", // Icon color
 };
-
 // Animation variants
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -47,18 +46,6 @@ const cardVariants = {
   },
 };
 
-const buttonVariants = {
-  hover: {
-    scale: 1.02,
-    backgroundColor: COLORS.primaryHover,
-    transition: {
-      duration: 0.2,
-    },
-  },
-  tap: {
-    scale: 0.98,
-  },
-};
 
 const pulseVariants = {
   pulse: {

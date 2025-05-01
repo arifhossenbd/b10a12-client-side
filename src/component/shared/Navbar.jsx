@@ -84,7 +84,7 @@ const Navbar = () => {
             damping: 20,
           }}
         >
-          <div className="px-4 md:w-11/12 lg:w-11/12 mx-auto">
+          <div className="px-4 lg:w-11/12 mx-auto">
             <div className="flex items-center justify-between h-16">
               {/* Brand logo and mobile menu button */}
               <div className="flex items-center gap-2">

@@ -7,7 +7,7 @@ const Login = () => {
 
   const handleLogin = async (data) => {
     const toastId = toast.loading("Securely logging you in...", {
-      duration: 2000
+      duration: 2000,
     });
 
     try {
