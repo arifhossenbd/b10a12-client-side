@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { FaHeartbeat, FaSearch, FaTint, FaUserPlus } from "react-icons/fa";
 import CountUp from "react-countup";
+import Search from "../Search/Search";
 
 const Banner = () => {
   const navigate = useNavigate();
@@ -11,6 +12,10 @@ const Banner = () => {
     { type: "O-", level: "critical" },
     { type: "B-", level: "low" },
   ];
+
+  const searchModal = () => {
+    document.getElementById("searchModal").showModal();
+  };
 
   return (
     <div className="relative bg-[url('/blood-donate-and-heart-rate.jpg')] bg-contain bg-center">
@@ -78,30 +83,33 @@ const Banner = () => {
               </motion.div>
             ))}
           </div>
-          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 md:gap-6">
-            <motion.button
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate("/register")}
-              className="flex items-center justify-center gap-2 px-6 py-3 sm:px-7 sm:py-3 md:px-8 md:py-4 bg-white text-red-700 font-semibold md:font-bold rounded-lg shadow-md hover:shadow-lg transition-all cursor-pointer text-sm sm:text-base md:text-lg"
-            >
-              <FaUserPlus className="text-lg" /> Register as Donor
-            </motion.button>
+          <div>
+            <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 md:gap-6">
+              <motion.button
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => navigate("/register")}
+                className="flex items-center justify-center gap-2 px-6 py-3 sm:px-7 sm:py-3 md:px-8 md:py-4 bg-white text-red-700 font-semibold md:font-bold rounded-lg shadow-md hover:shadow-lg transition-all cursor-pointer text-sm sm:text-base md:text-lg"
+              >
+                <FaUserPlus className="text-lg" /> Register as Donor
+              </motion.button>
 
-            <motion.button
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => navigate("/search")}
-              className="flex items-center justify-center gap-2 px-6 py-3 sm:px-7 sm:py-3 md:px-8 md:py-4 bg-transparent border-2 border-white/80 text-white font-semibold md:font-bold rounded-lg hover:bg-red-800/90 hover:border-red-800 backdrop-blur-sm transition-all cursor-pointer text-sm sm:text-base md:text-lg"
-            >
-              <FaSearch className="text-lg" /> Find Donors Now
-            </motion.button>
+              <motion.button
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={searchModal}
+                className="flex items-center justify-center gap-2 px-6 py-3 sm:px-7 sm:py-3 md:px-8 md:py-4 bg-transparent border-2 border-white/80 text-white font-semibold md:font-bold rounded-lg hover:bg-red-800/90 hover:border-red-800 backdrop-blur-sm transition-all cursor-pointer text-sm sm:text-base md:text-lg"
+              >
+                <FaSearch className="text-lg" /> Find Donors Now
+              </motion.button>
+            </div>
+            <Search />
           </div>
           <div className="mt-12 md:mt-16 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-red-100 text-xs sm:text-sm">
             <motion.div

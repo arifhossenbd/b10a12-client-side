@@ -38,7 +38,7 @@ export const postLoginLinks = [
   {
     id: 2,
     name: "Donation Requests",
-    path: "/donations",
+    path: "/donation-requests",
     icon: FaHandsHelping,
   },
   {
