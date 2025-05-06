@@ -10,8 +10,7 @@ const findSelectedItem = (list, value) => {
 const LocationSelector = ({
   color,
   values,
-  handleChange,
-  setFieldValue,
+  setFieldValue, // Only need setFieldValue
   errors,
   touched,
 }) => {
@@ -47,6 +46,24 @@ const LocationSelector = ({
       : [];
   }, [values.district, districts, upazilas]);
 
+  // Handle select changes consistently
+  const handleDivisionChange = (e) => {
+    const value = e.target.value;
+    setFieldValue("division", value);
+    setFieldValue("district", ""); // Reset dependent fields
+    setFieldValue("upazila", "");
+  };
+
+  const handleDistrictChange = (e) => {
+    const value = e.target.value;
+    setFieldValue("district", value);
+    setFieldValue("upazila", ""); // Reset dependent field
+  };
+
+  const handleUpazilaChange = (e) => {
+    setFieldValue("upazila", e.target.value);
+  };
+
   return (
     <>
       {/* Division Field */}
@@ -62,11 +79,7 @@ const LocationSelector = ({
           <div className="relative">
             <select
               name="division"
-              onChange={(e) => {
-                handleChange(e);
-                setFieldValue("district", "");
-                setFieldValue("upazila", "");
-              }}
+              onChange={handleDivisionChange}
               value={values.division}
               className="w-full p-2 pl-10 border rounded focus:outline-none"
               style={{
@@ -122,10 +135,7 @@ const LocationSelector = ({
             <div className="relative">
               <select
                 name="district"
-                onChange={(e) => {
-                  handleChange(e);
-                  setFieldValue("upazila", "");
-                }}
+                onChange={handleDistrictChange}
                 value={values.district}
                 className="w-full p-2 pl-10 border rounded focus:outline-none"
                 style={{
@@ -182,7 +192,7 @@ const LocationSelector = ({
             <div className="relative">
               <select
                 name="upazila"
-                onChange={handleChange}
+                onChange={handleUpazilaChange}
                 value={values.upazila}
                 className="w-full p-2 pl-10 border rounded focus:outline-none"
                 style={{

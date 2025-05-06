@@ -9,29 +9,14 @@ import {
   FaImage,
   FaEye,
   FaEyeSlash,
-  FaSpinner,
   FaHeartbeat,
   FaCheckCircle,
 } from "react-icons/fa";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import PrimaryBtn from "../../Buttons/PrimaryBtn";
 import LocationSelector from "../LocationSelector/LocationSelector";
 import { useState } from "react";
-
-// Color scheme constants
-const COLORS = {
-  primary: "#E53E3E",
-  primaryHover: "#C53030",
-  secondary: "#3182CE",
-  background: "#F7FAFC",
-  cardBg: "#FFFFFF",
-  textPrimary: "#2D3748",
-  textSecondary: "#718096",
-  error: "#E53E3E",
-  success: "#38A169",
-  border: "#E2E8F0",
-  icon: "#718096",
-};
+import {COLORS} from "../../utils/colorConfig"
 
 // Animation variants
 const cardVariants = {
@@ -251,7 +236,7 @@ const AuthForm = ({ type = "login", onSubmit, user }) => {
                     </div>
 
                     {/* Location Selector */}
-                    <LocationSelector 
+                    <LocationSelector
                       color={COLORS}
                       setFieldValue={setFieldValue}
                       values={values}
@@ -509,32 +494,13 @@ const AuthForm = ({ type = "login", onSubmit, user }) => {
                   </div>
                 )}
                 <PrimaryBtn
-                  style="w-full flex justify-center"
+                  type={isSubmitting || user ? "button" : "submit"}
+                  style="w-full"
                   user={user}
                   loading={isSubmitting}
                   toolTipText={"You are already logged in"}
                 >
-                  {isSubmitting ? (
-                    <div className="flex items-center gap-2">
-                      <motion.div
-                        animate={{ rotate: 360 }}
-                        transition={{
-                          duration: 1,
-                          repeat: Infinity,
-                          ease: "linear",
-                        }}
-                      >
-                        <FaSpinner />
-                      </motion.div>
-                      <span>
-                        {type === "login" ? "Logging in..." : "Registering..."}
-                      </span>
-                    </div>
-                  ) : type === "login" ? (
-                    "Login"
-                  ) : (
-                    "Register"
-                  )}
+                  {type === "register" ? "Register" : "Login"}
                 </PrimaryBtn>
 
                 <div

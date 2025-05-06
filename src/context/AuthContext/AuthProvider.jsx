@@ -9,7 +9,7 @@ import {
 } from "firebase/auth";
 import { auth } from "../../firebase/firebase.config";
 import toast from "react-hot-toast";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);

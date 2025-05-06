@@ -1,10 +1,10 @@
 import { motion, AnimatePresence } from "motion/react";
-import { Link, NavLink } from "react-router";
+import { Link, NavLink } from "react-router-dom";
 import {
   postLoginLinks,
   preLoginLinks,
   userDropdownLinks,
-} from "../../config/links";
+} from "../../utils/links";
 import { useAuth } from "../../hooks/useAuth";
 import { FaUser, FaSignOutAlt, FaBars, FaTimes } from "react-icons/fa";
 import { FaDroplet } from "react-icons/fa6";
@@ -182,7 +182,7 @@ const Navbar = () => {
                         <img
                           alt="User profile"
                           src={user?.photoURL}
-                          className="object-cover w-full h-full rounded-full"
+                          className="object-cover object-center w-full h-full rounded-full"
                         />
                       </figure>
                     ) : (

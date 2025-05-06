@@ -35,22 +35,42 @@ const Register = () => {
           console.error("Image upload error:", error);
         }
       }
-      const userData = {
+      const donorData = {
+        // Basic Info
         name: data.name,
         email: data.email,
         bloodGroup: data.bloodGroup,
-        division: data.division,
-        district: data.district,
-        upazila: data.upazila,
-        ...(imageUrl && { image: imageUrl }),
-        role: "donor",
-        status: "active",
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
+
+        // Location
+        location: {
+          division: data.division,
+          district: data.district,
+          upazila: data.upazila,
+          fullAddress: "",
+        },
+        // Status history
+        statusHistory: [{
+          status: "active",
+          changedAt: new Date().toISOString(),
+          changedBy: "admin",
+          reason: "New registration",
+        }],
+
+        // Current Status
+        accountStatus: "active",
+        availability: true,
+        lastDonationDate: null,
+        nextEligibleDonationDate: null, // Calculated (lastDonation + 3 months)
+
+        // System
+        role: "donor", // 'donor', 'admin', 'volunteer'
+        image: imageUrl || null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
 
       await register(data.email, data.password, data.name, imageUrl);
-      const res = await axiosPublic.post("/users", userData);
+      const res = await axiosPublic.post("/donors", donorData);
 
       if (res.status === 201) {
         toast.success(
@@ -71,7 +91,7 @@ const Register = () => {
   return (
     <div className="max-w-md mx-auto">
       <AuthForm type="register" onSubmit={handleRegister} user={user} />
-      <p className="text-center text-sm text-gray-600 pb-8">
+      <p className="text-center text-sm text-gray-600 pb-8 px-4">
         By registering, you're agreeing to help save lives through blood
         donation.
       </p>

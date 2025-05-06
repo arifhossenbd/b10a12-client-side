@@ -1,8 +1,9 @@
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FaHeartbeat, FaSearch, FaTint, FaUserPlus } from "react-icons/fa";
 import CountUp from "react-countup";
 import Search from "../Search/Search";
+import SecondaryBtn from "../../Buttons/SecondaryBtn";
 
 const Banner = () => {
   const navigate = useNavigate();
@@ -14,15 +15,19 @@ const Banner = () => {
   ];
 
   const searchModal = () => {
-    document.getElementById("searchModal").showModal();
+    const modal = document.getElementById("searchModal");
+    if (modal) modal.showModal();
   };
 
   return (
-    <div className="relative bg-[url('/blood-donate-and-heart-rate.jpg')] bg-contain bg-center">
-      <div className="absolute inset-0 bg-gradient-to-br from-red-900/95 via-red-800/90 to-red-700/90 rounded-lg" />
+    <div className="relative w-full min-h-[500px] overflow-hidden pt-16 lg:pt-4">
+      {/* Background layers */}
+      <div className="absolute inset-0 bg-[url('/blood-donate-and-heart-rate.jpg')] bg-cover bg-center" />
+      <div className="absolute inset-0 bg-gradient-to-br from-red-900/95 via-red-800/90 to-red-700/90" />
 
-      <div className="relative z-10 py-12 md:py-16 lg:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <div className="text-center">
+      {/* Content container */}
+      <div className="relative z-10 h-full w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-24 flex items-center justify-center">
+        <div className="w-full text-center">
           {urgentBloodTypes.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 40 }}
@@ -41,6 +46,7 @@ const Banner = () => {
               ))}
             </motion.div>
           )}
+
           <motion.h1
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -53,6 +59,7 @@ const Banner = () => {
             <br className="hidden sm:block" />
             Someone's Miracle
           </motion.h1>
+
           <div className="max-w-2xl md:max-w-3xl mx-auto">
             <motion.p
               initial={{ opacity: 0, y: 50 }}
@@ -69,6 +76,7 @@ const Banner = () => {
               lives saved this year
             </motion.p>
           </div>
+
           <div className="flex flex-wrap justify-center gap-4 sm:gap-6 md:gap-8 mb-8 md:mb-12">
             {["A+", "B+", "O+", "AB+"].map((type) => (
               <motion.div
@@ -83,34 +91,59 @@ const Banner = () => {
               </motion.div>
             ))}
           </div>
+
           <div>
             <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 md:gap-6">
-              <motion.button
+              <motion.div
                 initial={{ opacity: 0, x: -50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5 }}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => navigate("/register")}
-                className="flex items-center justify-center gap-2 px-6 py-3 sm:px-7 sm:py-3 md:px-8 md:py-4 bg-white text-red-700 font-semibold md:font-bold rounded-lg shadow-md hover:shadow-lg transition-all cursor-pointer text-sm sm:text-base md:text-lg"
+                className="flex items-center justify-center gap-2"
               >
-                <FaUserPlus className="text-lg" /> Register as Donor
-              </motion.button>
-
-              <motion.button
+                <SecondaryBtn style="px-6 py-3 sm:px-7 sm:py-3 md:px-8 md:py-4 bg-white text-red-700 font-semibold md:font-bold rounded-lg shadow-md hover:shadow-lg transition-all cursor-pointer text-sm sm:text-base md:text-lg">
+                  <FaUserPlus className="text-lg" /> Register as Donor
+                </SecondaryBtn>
+              </motion.div>
+              {/* Search */}
+              <motion.div
                 initial={{ opacity: 0, x: 50 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.5 }}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={searchModal}
-                className="flex items-center justify-center gap-2 px-6 py-3 sm:px-7 sm:py-3 md:px-8 md:py-4 bg-transparent border-2 border-white/80 text-white font-semibold md:font-bold rounded-lg hover:bg-red-800/90 hover:border-red-800 backdrop-blur-sm transition-all cursor-pointer text-sm sm:text-base md:text-lg"
+                className="flex items-center justify-center gap-2"
               >
-                <FaSearch className="text-lg" /> Find Donors Now
-              </motion.button>
+                <SecondaryBtn style="px-6 py-3 sm:px-7 sm:py-3 md:px-8 md:py-4 bg-gradient-to-r from-red-600 to-red-500 shadow-md hover:from-red-700 hover:to-red-600 text-white border font-semibold md:font-bold rounded-lg shadow-md hover:shadow-lg transition-all cursor-pointer text-sm sm:text-base md:text-lg">
+                  <motion.span
+                    animate={{
+                      x: [0, 3, -2, 0],
+                      y: [0, 2, -1, 0],
+                      rotate: [0, 5, -5, 0],
+                      transition: {
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        duration: 3,
+                        ease: "easeInOut",
+                      },
+                    }}
+                    whileHover={{
+                      scale: 1.1,
+                      transition: { duration: 0.2 },
+                    }}
+                  >
+                    <FaSearch className="mr-2" />
+                  </motion.span>
+                  Find Donors Now
+                </SecondaryBtn>
+              </motion.div>
             </div>
             <Search />
           </div>
+
           <div className="mt-12 md:mt-16 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-red-100 text-xs sm:text-sm">
             <motion.div
               initial={{ opacity: 0, x: -50 }}

@@ -15,22 +15,8 @@ import { motion } from "framer-motion";
 import useAxiosPublic from "../../hooks/useAxiosPublic";
 import toast from "react-hot-toast";
 import PrimaryBtn from "../../Buttons/PrimaryBtn";
-import { Link } from "react-router";
-
-// Color scheme constants
-const COLORS = {
-  primary: "#E53E3E", // Vibrant red for primary actions
-  primaryHover: "#C53030", // Darker red for hover states
-  secondary: "#3182CE", // Blue for links
-  background: "#F7FAFC", // Light background
-  cardBg: "#FFFFFF", // White card background
-  textPrimary: "#2D3748", // Dark text
-  textSecondary: "#718096", // Secondary text
-  error: "#E53E3E", // Error messages
-  success: "#38A169", // Success messages
-  border: "#E2E8F0", // Border color
-  icon: "#718096", // Icon color
-};
+import { Link } from "react-router-dom";
+import { COLORS } from "../../utils/colorConfig";
 
 const fieldFocusVariants = {
   focus: {
@@ -82,7 +68,7 @@ const Contact = () => {
   };
 
   return (
-    <div className="w-full bg-white">
+    <div className="bg-white">
       {/* Header Section */}
       <div className="text-center mb-8 md:mb-12">
         <motion.h2
@@ -97,7 +83,7 @@ const Contact = () => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-base md:text-lg text-gray-600 max-w-2xl mx-auto"
+          className="text-base md:text-lg text-gray-600"
         >
           Have questions about donation? Need help finding a donor?
         </motion.p>
@@ -328,7 +314,7 @@ const Contact = () => {
                     type="submit"
                     disabled={isSubmitting}
                     loading={isSubmitting}
-                    style="w-full md:w-fit flex justify-center"
+                    style="w-full md:w-fit"
                   >
                     {isSubmitting ? (
                       <>

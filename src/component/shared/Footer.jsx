@@ -6,7 +6,7 @@ import {
   FaLinkedin,
 } from "react-icons/fa";
 import { FaDroplet, FaXTwitter } from "react-icons/fa6";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   const footerLinks = [

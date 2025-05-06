@@ -17,7 +17,7 @@ export const preLoginLinks = [
   {
     id: 2,
     name: "Donation Requests",
-    path: "/donations",
+    path: "/donation-requests",
     icon: FaHandsHelping,
   },
   {

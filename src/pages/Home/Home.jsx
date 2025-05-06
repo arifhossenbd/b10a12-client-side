@@ -1,14 +1,16 @@
 import Banner from "./Banner";
-import Contact from "./Contact";
 import Featured from "./Featured";
+import Contact from "./Contact"
 
 const Home = () => {
   return (
     <section className="bg-base-100">
-      <div className="px-4 lg:w-11/12 mx-auto pb-8 pt-24 space-y-5">
+      <div className="w-full overflow-x-hidden space-y-5 pb-8 md:pb-12 lg:pb-24">
         <Banner />
-        <Featured/>
-        <Contact/>
+        <div className="px-4 lg:w-11/12 mx-auto">
+          <Featured />
+          <Contact/>
+        </div>
       </div>
     </section>
   );

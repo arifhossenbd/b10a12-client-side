@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter } from "react-router-dom";
 import Main from "../layout/Main";
 import Home from "../pages/Home/Home";
 import ErrorPage from "../pages/ErrorPage/ErrorPage";
@@ -6,6 +6,7 @@ import Register from "../pages/Auth/Register";
 import Login from "../pages/Auth/Login";
 import DonationRequests from "../pages/DonationRequests/DonationRequests";
 import SearchResults from "../pages/SearchResults/SearchResults";
+import DonationRequestDetails from "../pages/DonationRequests/DonationRequestDetails";
 
 export const routes = createBrowserRouter([
   {
@@ -32,6 +33,10 @@ export const routes = createBrowserRouter([
       {
         path: "/search-results",
         element: <SearchResults />,
+      },
+      {
+        path: "/blood-request-details/:id",
+        element: <DonationRequestDetails />,
       },
     ],
   },
