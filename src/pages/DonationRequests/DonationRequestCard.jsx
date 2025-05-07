@@ -11,8 +11,10 @@ import {
   formatTime,
 } from "../../utils/config.jsx";
 import CloseBtn from "../../Buttons/CloseBtn.jsx";
+import { FaExclamationTriangle, FaEye } from "react-icons/fa";
+import toast from "react-hot-toast";
 
-const DonationRequestCard = ({ request, isLoading, error, refetch }) => {
+const DonationRequestCard = ({ request, refetch }) => {
   const [selectedId, setSelectedId] = useState(null);
 
   const item = {
@@ -22,39 +24,13 @@ const DonationRequestCard = ({ request, isLoading, error, refetch }) => {
   };
 
   const openDonationDetailsModal = (id) => {
+    if (!id) {
+      toast.error("Invalid request ID");
+      return;
+    }
     document.getElementById("donationDetailsModal").showModal();
     setSelectedId(id);
   };
-
-  if (isLoading) {
-    return (
-      <motion.div
-        variants={item}
-        className="border border-gray-200 p-6 rounded-xl shadow-sm bg-white"
-      >
-        {/* Loading skeleton */}
-      </motion.div>
-    );
-  }
-
-  if (error) {
-    return (
-      <motion.div
-        variants={item}
-        className="border border-red-100 p-6 rounded-xl shadow-sm bg-red-50"
-      >
-        <div className="flex flex-col items-center justify-center text-center py-8">
-          <baseConfig.icons.alert className="text-red-500 text-3xl mb-4" />
-          <h3 className="text-lg font-medium text-red-600 mb-2">
-            Failed to load request
-          </h3>
-          <p className="text-gray-600 text-sm">
-            {error.message || "Please try again later"}
-          </p>
-        </div>
-      </motion.div>
-    );
-  }
 
   if (!request) {
     return (
@@ -63,7 +39,7 @@ const DonationRequestCard = ({ request, isLoading, error, refetch }) => {
         className="border border-gray-200 p-6 rounded-xl shadow-sm bg-white"
       >
         <div className="flex flex-col items-center justify-center text-center py-8">
-          <baseConfig.icons.alert className="text-gray-400 text-3xl mb-4" />
+          <FaExclamationTriangle className="text-gray-400 text-3xl mb-4" />
           <p className="text-gray-500 text-sm">No donation request available</p>
         </div>
       </motion.div>
@@ -92,7 +68,6 @@ const DonationRequestCard = ({ request, isLoading, error, refetch }) => {
   return (
     <>
       <motion.div
-        key={_id}
         variants={item}
         whileHover="hover"
         className={`border ${urgencyConfig.borderColor} p-3 md:p-4 lg:p-5 rounded-xl shadow-sm bg-white transition-all duration-300 hover:border-red-100 hover:bg-red-50 flex flex-col h-full`}
@@ -166,7 +141,7 @@ const DonationRequestCard = ({ request, isLoading, error, refetch }) => {
             style="w-full flex justify-center bg-red-500 hover:bg-red-600 text-white"
             onClick={() => openDonationDetailsModal(_id)}
           >
-            <baseConfig.icons.eye className="mr-2" />
+            <FaEye className="mr-2" />
             View Details
           </PrimaryBtn>
         </div>
@@ -174,31 +149,21 @@ const DonationRequestCard = ({ request, isLoading, error, refetch }) => {
 
       {/* Modal */}
       <dialog id="donationDetailsModal" className="modal modal-middle">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="modal-box max-w-3xl relative overflow-x-hidden"
-        >
+        <div className="modal-box max-w-3xl relative overflow-x-hidden">
           <DonationRequestDetails
             urgencyConfig={urgencyConfig}
             bloodGroupConfig={bloodGroupConfig}
             statusConfig={statusConfig}
             requestId={selectedId}
             refetch={refetch}
-            closeModal={() =>
-              document.getElementById("donationDetailsModal").close()
-            }
+            closeModal={() => document.getElementById("donationDetailsModal").close()}
           />
           <div className="absolute right-7 top-8 -translate-0.5">
             <CloseBtn
-              onClick={() =>
-                document.getElementById("donationDetailsModal").close()
-              }
+              onClick={() => document.getElementById("donationDetailsModal").close()}
             />
           </div>
-        </motion.div>
+        </div>
         <form method="dialog" className="modal-backdrop">
           <button>close</button>
         </form>

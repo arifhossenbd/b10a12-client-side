@@ -3,27 +3,40 @@ import useAxiosPublic from "./useAxiosPublic";
 
 export const useDatabaseData = (endpoint, options = {}) => {
   const axiosPublic = useAxiosPublic();
+  const { page = 1, limit = 10, ...filters } = options;
 
   return useQuery({
-    queryKey: [endpoint, options],
+    queryKey: [endpoint, { page, limit, ...filters }],
     
     queryFn: async () => {
-      const response = await axiosPublic.get(endpoint, { params: options });
-
-      if (!response.data.success) {
-        throw new Error(response.data.message || "Request failed");
+      if (!endpoint) {
+        throw new Error("No endpoint provided");
       }
 
-      // Return consistent structure for both single items and paginated lists
+      const { data } = await axiosPublic.get(endpoint, {
+        params: { page, limit, ...filters },
+      });
+
+      if (data?.success === false) {
+        throw new Error(data.message || "Request failed");
+      }
+
       return {
-        data: response.data.data,
-        total: response.data.total || 1,
-        page: response.data.page || 1,
-        limit: response.data.limit || 10,
-        totalPages: Math.ceil(
-          (response.data.total || 1) / (response.data.limit || 10)
-        ),
+        data: data?.data ?? data,
+        meta: {
+          total: data?.total ?? 0,
+          page: Number(page),
+          limit: Number(limit),
+          totalPages: Math.ceil((data?.total ?? 0) / limit),
+        }
       };
-    }
+    },
+
+    enabled: !!endpoint,
+    retry: (failureCount, error) => {
+      return error?.response?.status >= 500 && failureCount < 2;
+    },
+    staleTime: 300000,
+    refetchOnWindowFocus: false,
   });
 };

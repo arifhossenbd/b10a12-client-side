@@ -122,7 +122,7 @@ const DonationRequestModal = ({ donor }) => {
           },
         };
 
-        const response = await axiosPublic.post("/blood-request", requestData);
+        const response = await axiosPublic.post("/blood-requests", requestData);
 
         if (response.status === 201) {
           toast.success("Request submitted successfully!");
