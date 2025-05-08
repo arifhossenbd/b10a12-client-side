@@ -8,44 +8,34 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { auth } from "../../firebase/firebase.config";
-import toast from "react-hot-toast";
-import { useLocation, useNavigate } from "react-router-dom";
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const from = location?.state?.from || "/";
 
   const register = async (email, password, name, image) => {
     setLoading(true);
     try {
-      const response = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      // Create user in Firebase
+      const response = await createUserWithEmailAndPassword(auth, email, password);
+      
       if (!response?.user) {
-        toast.error("Registration failed. Please try again.");
-        return;
+        throw new Error("User creation failed");
       }
 
+      // Update profile
       await updateProfile(auth.currentUser, {
         displayName: name,
         photoURL: image,
       });
-      navigate(from, { replace: true });
+
+      // Update local state
+      setUser({ ...auth.currentUser });
+
       return response.user;
     } catch (error) {
       console.error("Registration failed:", error);
-      if (error.code === "auth/email-already-in-use") {
-        toast.error("The email address is already in use.");
-        navigate("/login");
-        return;
-      }
-      toast.error("Registration failed. Please try again.");
-      return;
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -54,31 +44,12 @@ const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
-      if (!userCredential?.user) {
-        toast.error("Login failed. Please try again.");
-        return;
-      }
-      navigate(from, { replace: true });
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      setUser(userCredential.user);
       return userCredential.user;
     } catch (error) {
       console.error("Login failed:", error);
-      if (error.code === "auth/user-not-found") {
-        toast.error("User not found. Please check your email or register.");
-        navigate("/register");
-        return;
-      }
-      if (error.code === "auth/wrong-password") {
-        toast.error("Incorrect password. Please try again.");
-        return;
-      }
-      toast.error("Login failed. Please try again.");
-      return;
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -87,11 +58,11 @@ const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await signOut(auth);
+      setUser(null);
       return true;
     } catch (error) {
       console.error("Logout failed:", error);
-      toast.error("Logout failed. Please try again.");
-      return false;
+      throw error;
     }
   };
 
@@ -108,7 +79,7 @@ const AuthProvider = ({ children }) => {
     loading,
     register,
     login,
-    logout
+    logout,
   };
 
   return (

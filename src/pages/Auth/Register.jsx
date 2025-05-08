@@ -3,13 +3,17 @@ import AuthForm from "../../component/AuthForm/AuthForm";
 import { useAuth } from "../../hooks/useAuth";
 import useAxiosPublic from "../../hooks/useAxiosPublic";
 import { FaUserPlus } from "react-icons/fa";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const imgbbKey = import.meta.env.VITE_IMGBB_API_KEY;
 const imgbbUrl = `${import.meta.env.VITE_IMGBB_URL}?key=${imgbbKey}`;
 
 const Register = () => {
   const { user, register } = useAuth();
-  const axiosPublic = useAxiosPublic();
+  const { axiosPublic, axiosImgBB } = useAxiosPublic();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || "/";
 
   const handleRegister = async (data) => {
     const toastId = toast.loading("Creating your account...", {
@@ -23,7 +27,7 @@ const Register = () => {
           const formData = new FormData();
           formData.append("image", data.image);
 
-          const imgUploadResponse = await axiosPublic.post(imgbbUrl, formData, {
+          const imgUploadResponse = await axiosImgBB.post(imgbbUrl, formData, {
             headers: {
               "Content-Type": "multipart/form-data",
             },
@@ -49,12 +53,14 @@ const Register = () => {
           fullAddress: "",
         },
         // Status history
-        statusHistory: [{
-          status: "active",
-          changedAt: new Date().toISOString(),
-          changedBy: "admin",
-          reason: "New registration",
-        }],
+        statusHistory: [
+          {
+            status: "active",
+            changedAt: new Date().toISOString(),
+            changedBy: "admin",
+            reason: "New registration",
+          },
+        ],
 
         // Current Status
         accountStatus: "active",
@@ -80,11 +86,18 @@ const Register = () => {
           </div>,
           { id: toastId, duration: 3000 }
         );
+        navigate(from, { replace: true });
       } else {
         throw new Error("Failed to save user data");
       }
     } catch (error) {
-      console.error("Registration error:", error);
+      toast.dismiss(toastId);
+      if (error.code === "auth/email-already-in-use") {
+        toast.error("Email already registered. Please login instead.");
+        navigate("/login", { state: { from } });
+      } else {
+        toast.error("Registration failed. Please try again.");
+      }
     }
   };
 

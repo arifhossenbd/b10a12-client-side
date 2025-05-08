@@ -42,7 +42,7 @@ const DonationRequestDetails = ({
 }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { user } = useAuth();
-  const axiosPublic = useAxiosPublic();
+  const { axiosPublic } = useAxiosPublic();
   const nowTime = useMemo(() => dayjs().toISOString(), []);
 
   const {
@@ -53,6 +53,7 @@ const DonationRequestDetails = ({
   } = useDatabaseData(requestId ? `/blood-requests/${requestId}` : null);
 
   const requestData = useMemo(() => data?.data || {}, [data]);
+  console.log(requestData)
 
   const {
     _id = "",

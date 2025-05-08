@@ -4,7 +4,10 @@ const useAxiosPublic = () => {
     baseURL: import.meta.env.VITE_API_URL,
     withCredentials: true,
   });
-  return axiosPublic;
+  const axiosImgBB = axios.create({
+    withCredentials: false,
+  });
+  return { axiosPublic, axiosImgBB };
 };
 
 export default useAxiosPublic;

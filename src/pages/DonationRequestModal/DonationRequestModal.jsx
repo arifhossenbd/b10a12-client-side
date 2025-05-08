@@ -26,7 +26,7 @@ import { validateDonationTime } from "../../utils/timeUtils";
 const DonationRequestModal = ({ donor }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const axiosPublic = useAxiosPublic();
+  const { axiosPublic } = useAxiosPublic();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { uid, displayName, email } = user || {};
   const {

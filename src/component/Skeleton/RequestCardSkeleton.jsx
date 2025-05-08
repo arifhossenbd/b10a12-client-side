@@ -52,7 +52,7 @@ const RequestCardSkeleton = ({ count = 6 }) => {
   };
 
   return (
-    <div className='py-8 pt-24 px-4 lg:w-11/12 mx-auto min-h-screen'>
+    <div className='py-8 pt-24 lg:w-11/12 mx-auto min-h-screen'>
       <motion.div
         initial="hidden"
         animate="show"
