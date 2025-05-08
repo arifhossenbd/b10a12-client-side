@@ -14,15 +14,18 @@ import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth";
 import PrimaryBtn from "../../Buttons/PrimaryBtn";
+import SecondaryBtn from "../../Buttons/SecondaryBtn";
 import useAxiosPublic from "../../hooks/useAxiosPublic";
 import { useState, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
-import SecondaryBtn from "../../Buttons/SecondaryBtn";
 import dayjs from "dayjs";
 import {
   formatDate,
   formatTime,
   getStatusConfig,
+  getUrgencyConfig,
+  getBloodGroupConfig,
+  baseConfig,
 } from "../../utils/config.jsx";
 import {
   scrollYAnimation,
@@ -32,14 +35,7 @@ import {
 } from "../../utils/animation.js";
 import { donationTimeValidate } from "../../utils/donationTimeValidate.js";
 
-const DonationRequestDetails = ({
-  requestId,
-  closeModal,
-  statusConfig,
-  bloodGroupConfig,
-  urgencyConfig,
-  refetch,
-}) => {
+const DonationRequestDetails = ({ requestId, closeModal, refetch }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { user } = useAuth();
   const { axiosPublic } = useAxiosPublic();
@@ -65,6 +61,11 @@ const DonationRequestDetails = ({
     status = {},
     updatedAt = nowTime,
   } = requestData;
+
+  // Get configs using your imported functions
+  const urgencyConfig = getUrgencyConfig(donationInfo?.urgency);
+  const statusConfig = getStatusConfig(status);
+  const bloodGroupConfig = getBloodGroupConfig(donationInfo?.bloodGroup);
 
   const safeData = useMemo(
     () => ({
@@ -110,7 +111,19 @@ const DonationRequestDetails = ({
     [donationInfo, location, metadata, nowTime, recipient, requester, status]
   );
 
-  const donationProcess = donationStatus === "inprogress";
+  const isRequester = useMemo(() => {
+    return user?.uid === safeData.requester.id;
+  }, [user?.uid, safeData.requester.id]);
+
+  const isAssignedDonor = useMemo(() => {
+    return user?.uid === safeData.metadata.donorId;
+  }, [user?.uid, safeData.metadata.donorId]);
+
+  const canDonate = useMemo(() => {
+    return !isRequester && !isAssignedDonor && donationStatus !== "inprogress";
+  }, [isRequester, isAssignedDonor, donationStatus]);
+
+  const donationProcess = donationStatus === "inprogress" && !isAssignedDonor;
 
   const handleDonateClick = useCallback(() => {
     if (
@@ -130,6 +143,14 @@ const DonationRequestDetails = ({
       );
     }
 
+    if (isRequester) {
+      return toast.error("You cannot donate to your own request");
+    }
+
+    if (!canDonate) {
+      return toast.error("You are not eligible to donate to this request");
+    }
+
     closeModal();
     toast.custom(
       (t) => {
@@ -138,9 +159,12 @@ const DonationRequestDetails = ({
             setIsProcessing(true);
             const donationUpdate = {
               donationStatus: "inprogress",
-              donorId: user?.uid,
-              donorName: user?.displayName,
-              donorEmail: user?.email,
+              metadata: {
+                ...safeData.metadata,
+                donorId: user?.uid,
+                donorName: user?.displayName,
+                donorEmail: user?.email,
+              },
               status: {
                 current: "inprogress",
                 history: [
@@ -305,7 +329,7 @@ const DonationRequestDetails = ({
               </SecondaryBtn>
               <PrimaryBtn
                 onClick={handleConfirm}
-                disabled={isProcessing || donationProcess}
+                disabled={isProcessing || !canDonate}
               >
                 {isProcessing ? (
                   <span className="flex items-center gap-2">
@@ -341,6 +365,7 @@ const DonationRequestDetails = ({
     );
   }, [
     _id,
+    isRequester,
     isProcessing,
     closeModal,
     donationProcess,
@@ -350,19 +375,25 @@ const DonationRequestDetails = ({
     safeData,
     user,
     axiosPublic,
+    canDonate,
   ]);
 
   if (isLoading) {
     return (
       <motion.div className="flex justify-center items-center min-h-[200px]">
-        <div className="loading loading-xl loading-spinner text-red-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
       </motion.div>
     );
   }
 
   if (error) {
     return (
-      <motion.div className="flex flex-col items-center justify-center min-h-[200px] text-red-500 p-4 sm:p-6">
+      <motion.div
+        className="flex flex-col items-center justify-center min-h-[200px] text-red-500 p-4 sm:p-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
         <FaExclamationTriangle className="text-3xl sm:text-4xl mb-3 sm:mb-4" />
         <p className="text-base sm:text-lg font-medium">
           Failed to load request details
@@ -741,18 +772,28 @@ const DonationRequestDetails = ({
         ) : (
           <PrimaryBtn
             toolTipText={
-              donationStatus === "inprogress"
-                ? "Already being processed"
-                : "Confirm your donation"
+              donationStatus === "inprogress" && !isAssignedDonor
+                ? "Donation already in progress"
+                : isRequester
+                ? "You cannot donate to your own request"
+                : donationStatus === "inprogress" && isAssignedDonor
+                ? "You are already donating for this request"
+                : "I can donate to this request"
             }
             onClick={handleDonateClick}
-            disabled={isProcessing || donationStatus === "inprogress"}
+            disabled={
+              isProcessing ||
+              !canDonate ||
+              (donationStatus === "inprogress" && !isAssignedDonor)
+            }
             style="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto text-sm sm:text-base py-2 sm:py-3 px-4 sm:px-6 tooltip tooltip-info tooltip-top md:tooltip-left"
           >
             {isProcessing
               ? "Processing..."
               : donationStatus === "inprogress"
-              ? "In Progress"
+              ? isAssignedDonor
+                ? "You're Donating"
+                : "In Progress"
               : "I Can Donate"}
           </PrimaryBtn>
         )}
