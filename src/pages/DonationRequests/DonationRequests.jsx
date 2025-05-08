@@ -74,7 +74,6 @@ const DonationRequests = () => {
     hover: {
       y: -5,
       scale: 1.02,
-      boxShadow: "0 10px 30px -5px rgba(0, 0, 0, 0.1)",
       transition: {
         type: "spring",
         stiffness: 400,

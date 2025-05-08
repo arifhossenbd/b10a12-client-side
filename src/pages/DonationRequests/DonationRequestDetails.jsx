@@ -53,7 +53,6 @@ const DonationRequestDetails = ({
   } = useDatabaseData(requestId ? `/blood-requests/${requestId}` : null);
 
   const requestData = useMemo(() => data?.data || {}, [data]);
-  console.log(requestData)
 
   const {
     _id = "",
@@ -352,15 +351,6 @@ const DonationRequestDetails = ({
     user,
     axiosPublic,
   ]);
-
-  if (!requestId) {
-    return (
-      <motion.div className="flex flex-col items-center justify-center min-h-[200px] text-red-500 p-4 sm:p-6">
-        <FaExclamationTriangle className="text-3xl sm:text-4xl mb-3 sm:mb-4" />
-        <p className="text-base sm:text-lg font-medium">Invalid request ID</p>
-      </motion.div>
-    );
-  }
 
   if (isLoading) {
     return (

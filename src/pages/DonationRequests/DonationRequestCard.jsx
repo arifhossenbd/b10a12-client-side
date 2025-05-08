@@ -154,13 +154,17 @@ const DonationRequestCard = ({ request, refetch }) => {
             urgencyConfig={urgencyConfig}
             bloodGroupConfig={bloodGroupConfig}
             statusConfig={statusConfig}
-            requestId={selectedId}
+            requestId={selectedId && selectedId}
             refetch={refetch}
-            closeModal={() => document.getElementById("donationDetailsModal").close()}
+            closeModal={() =>
+              document.getElementById("donationDetailsModal").close()
+            }
           />
           <div className="absolute right-7 top-8 -translate-0.5">
             <CloseBtn
-              onClick={() => document.getElementById("donationDetailsModal").close()}
+              onClick={() =>
+                document.getElementById("donationDetailsModal").close()
+              }
             />
           </div>
         </div>
