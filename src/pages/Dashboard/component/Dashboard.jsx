@@ -87,10 +87,10 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div 
-        className="flex justify-center items-center h-64" 
+        className="flex flex-col justify-center items-center h-96" 
         style={{ backgroundColor: COLORS.background }}
       >
-        Loading dashboard...
+        <span className="loading loading-ring w-1/4 mx-auto"></span>
       </div>
     );
   }
@@ -151,7 +151,7 @@ const Dashboard = () => {
           }
         }}
       >
-        {currentStats.map((stat, index) => (
+        {currentStats?.map((stat, index) => (
           <StatCard
             key={index}
             title={stat.title}

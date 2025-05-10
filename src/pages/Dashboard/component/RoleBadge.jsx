@@ -29,7 +29,7 @@ const RoleBadge = ({ name, role, email }) => {
 
   return (
     <motion.div 
-      className="flex items-center gap-3 px-4 py-2 rounded-full"
+      className="flex items-center gap-3 py-2 rounded-full"
       style={{
         backgroundColor: currentRole.bg,
         color: currentRole.text

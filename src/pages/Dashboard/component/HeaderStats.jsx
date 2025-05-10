@@ -16,8 +16,8 @@ const HeaderStats = ({ stats }) => {
 
   return (
     <div className="hidden md:flex items-center gap-4">
-      {stats.map((stat, index) => (
-        <StatItem key={index} label={stat.label} value={stat.value} />
+      {stats?.map((stat, index) => (
+        <StatItem key={index} label={stat?.label} value={stat?.value} />
       ))}
     </div>
   );

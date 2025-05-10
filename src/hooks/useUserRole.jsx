@@ -14,10 +14,9 @@ const useUserRole = () => {
 
   useEffect(() => {
     if (data?.data) {
-      setUserData(data.data);
-      if (data.data.role) {
-        setRole(data.data.role);
-        console.log('User role set:', data.data.role);
+      setUserData(data?.data);
+      if (data?.data?.role) {
+        setRole(data?.data?.role);
       }
     }
   }, [data]);

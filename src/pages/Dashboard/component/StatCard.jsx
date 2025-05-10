@@ -23,7 +23,7 @@ const StatCard = ({ title, value, icon: Icon, color, borderColor }) => {
           className="p-3 rounded-full"
           style={{ backgroundColor: `${color}20` }}
         >
-          <Icon className="text-xl" />
+          <Icon className="text-xl text-red-600" />
         </div>
       </div>
     </motion.div>

@@ -36,11 +36,12 @@ const donorNavLinks = [
 ];
 
 const DonorDashboard = () => {
-  const { userData, logout } = useUserRole();
+  const { userData, logout, loading } = useUserRole();
   return (
     <div>
       <DashboardLayout
-        data={userData}
+        loading={loading}
+        userData={userData}
         navLinks={donorNavLinks}
         logout={logout}
         headerTitle="Donor Dashboard"

@@ -24,10 +24,11 @@ const volunteerLinks = [
   { id: 4, name: "Home", path: "/", icon: FaHome, exact: true },
 ];
 const VolunteerDashboard = () => {
-  const { userData, logout, role, user } = useUserRole();
+  const { userData, logout, role, user, loading } = useUserRole();
 
   return (
     <DashboardLayout
+      loading={loading}
       user={user}
       role={role}
       data={userData}

@@ -16,7 +16,7 @@ const PageHeader = ({ title, roleData, quickAction }) => {
               }}
               transition={{ repeat: Infinity, duration: 3 }}
             >
-              {roleData.badge} Mode
+              {roleData?.badge} Mode
             </motion.span>
           </h1>
           <p className="text-sm text-gray-600 mt-1">
