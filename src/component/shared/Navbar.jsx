@@ -207,7 +207,7 @@ const Navbar = () => {
                       </div>
 
                       <div className="py-1 px-4">
-                        {userDropdownLinks.map((link, i) => (
+                        {userDropdownLinks?.map((link, i) => (
                           <motion.div
                             key={link.id}
                             custom={i}

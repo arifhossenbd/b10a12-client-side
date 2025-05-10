@@ -2,7 +2,8 @@ import {
   FaHandsHelping,
   FaBlog,
   FaUser,
-  FaMoneyCheckAlt 
+  FaMoneyCheckAlt,
+  FaHome,
 } from "react-icons/fa";
 import { RiHomeHeartLine } from "react-icons/ri";
 import { MdSpaceDashboard } from "react-icons/md";
@@ -45,7 +46,7 @@ export const postLoginLinks = [
     id: 3,
     name: "Funding",
     path: "/funding",
-    icon: FaMoneyCheckAlt ,
+    icon: FaMoneyCheckAlt,
   },
   {
     id: 4,
@@ -67,5 +68,5 @@ export const userDropdownLinks = [
     name: "Profile",
     path: "/profile",
     icon: FaUser,
-  }
+  },
 ];

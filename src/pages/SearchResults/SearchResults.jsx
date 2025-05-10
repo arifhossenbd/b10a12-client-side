@@ -27,7 +27,7 @@ const SearchResult = () => {
   if (upazila) queryParams.upazila = upazila;
 
   const { data, isLoading, isError, error, refetch } = useDatabaseData(
-    "/donors",
+    "/users",
     {
       ...queryParams,
       page: 1,
@@ -36,8 +36,8 @@ const SearchResult = () => {
   );
 
   const donors = data?.data || [];
-  const isEmptyResponse = donors.length === 0 && !isLoading && !isError;
-  const isNetworkError = error?.code === "ERR_NETWORK";
+  const isEmptyResponse = donors?.length === 0 && !isLoading && !isError;
+  const isNetworkError = error.code === "ERR_NETWORK";
 
   const handleRefresh = async () => {
     setIsRefreshing(true);

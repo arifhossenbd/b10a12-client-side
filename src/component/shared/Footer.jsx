@@ -68,7 +68,7 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-gray-600">
-              Connecting donors with those in need since 2023. Every drop counts
+              Connecting donors with those in need since 1997. Every drop counts
               in saving lives.
             </p>
             <div className="flex gap-4">
