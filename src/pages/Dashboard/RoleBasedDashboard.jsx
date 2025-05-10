@@ -7,6 +7,8 @@ const RoleBasedDashboard = () => {
   if (loading) {
     return <Loading />;
   }
-  return <Navigate to={`/dashboard/${role?.toLowerCase()}`} replace />;
+  return (
+    <Navigate to={role ? `/dashboard/${role?.toLowerCase()}` : "/"} replace />
+  );
 };
 export default RoleBasedDashboard;

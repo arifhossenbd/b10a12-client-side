@@ -112,7 +112,7 @@ const DashboardLayout = ({ headerTitle, userData, logout, navLinks }) => {
               ) : (
                 <motion.button
                   whileHover={{
-                    rotate: -360,
+                    rotate: 360,
                     scale: 1.1,
                     transition: { duration: 0.5, stiffness: 0.1 },
                   }}
@@ -272,7 +272,7 @@ const DashboardLayout = ({ headerTitle, userData, logout, navLinks }) => {
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden transition-all duration-300">
         {/* Header */}
         <header className="bg-white border-b border-gray-200 sticky top-0 z-30">
-          <div className="flex items-center justify-between p-4">
+          <div className="flex items-center justify-between p-4 md:px-6">
             <motion.button
               whileHover={{ rotate: 90, scale: 1.1 }}
               whileTap={{ rotate: 180, scale: 0.9 }}

@@ -87,17 +87,17 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div 
-        className="flex flex-col justify-center items-center h-96" 
+        className="flex flex-col justify-center items-center h-screen" 
         style={{ backgroundColor: COLORS.background }}
       >
-        <span className="loading loading-ring w-1/4 mx-auto"></span>
+        <span className="loading loading-ring loading-xl mx-auto"></span>
       </div>
     );
   }
 
   return (
     <div 
-      className="p-6 min-h-screen" 
+      className="p-4 md:p-6 min-h-screen" 
       style={{ backgroundColor: COLORS.background }}
     >
       {/* Header with Role Badge and Stats */}

@@ -1,14 +1,11 @@
 import { motion, AnimatePresence } from "motion/react";
 import { Link, NavLink } from "react-router-dom";
-import {
-  postLoginLinks,
-  preLoginLinks,
-  userDropdownLinks,
-} from "../../utils/links";
-import { useAuth } from "../../hooks/useAuth";
+import { postLoginLinks, preLoginLinks } from "../../utils/links";
 import { FaUser, FaSignOutAlt, FaBars, FaTimes } from "react-icons/fa";
 import { FaDroplet } from "react-icons/fa6";
 import PrimaryBtn from "../../Buttons/PrimaryBtn";
+import useUserRole from "../../hooks/useUserRole";
+import { MdSpaceDashboard } from "react-icons/md";
 
 const navItemVariants = {
   hover: {
@@ -44,8 +41,21 @@ const dropdownVariants = {
 };
 
 const Navbar = () => {
-  const { user, logout, loading } = useAuth();
-
+  const { loading, user, role, logout } = useUserRole();
+  const userDropdownLinks = [
+    {
+      id: 1,
+      name: "Dashboard",
+      path: `/dashboard/${role ? role : "donor"}`,
+      icon: MdSpaceDashboard,
+    },
+    {
+      id: 2,
+      name: "Profile",
+      path: "/profile",
+      icon: FaUser,
+    },
+  ];
   if (loading) {
     return (
       <div className="fixed top-0 left-0 right-0 z-100 h-16 bg-gray-200 animate-pulse">

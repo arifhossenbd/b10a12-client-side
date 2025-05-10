@@ -45,7 +45,7 @@ const AdminDashboard = () => {
       loading={loading}
       user={user}
       role={role}
-      data={userData}
+      userData={userData}
       logout={logout}
       navLinks={adminNavLinks}
       headerTitle="Admin Dashboard"

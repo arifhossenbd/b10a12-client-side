@@ -31,7 +31,7 @@ const VolunteerDashboard = () => {
       loading={loading}
       user={user}
       role={role}
-      data={userData}
+      userData={userData}
       navLinks={volunteerLinks}
       logout={logout}
       headerTitle="Volunteer Dashboard"
