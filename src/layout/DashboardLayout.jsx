@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaTint,
@@ -13,7 +13,7 @@ import {
 } from "react-icons/fa";
 import { useState } from "react";
 
-const DashboardLayout = ({ headerTitle, userData, logout, navLinks }) => {
+const DashboardLayout = ({ headerTitle, userData, logout, navLinks, role }) => {
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [sidebarState, setSidebarState] = useState({
@@ -162,7 +162,9 @@ const DashboardLayout = ({ headerTitle, userData, logout, navLinks }) => {
                   >
                     <p className="font-medium truncate">{userData?.name}</p>
                     <p className="text-xs text-gray-500 truncate">
-                      {userData?.role && userData?.role?.charAt(0).toUpperCase() + userData?.role?.slice(1)}
+                      {userData?.role &&
+                        userData?.role?.charAt(0).toUpperCase() +
+                          userData?.role?.slice(1)}
                     </p>
                   </motion.div>
                   <motion.div
@@ -184,15 +186,17 @@ const DashboardLayout = ({ headerTitle, userData, logout, navLinks }) => {
                   exit={{ opacity: 0, height: 0 }}
                   className="mt-2 bg-gray-50 rounded-md overflow-hidden"
                 >
-                  <motion.button
-                    whileHover={{ x: 5 }}
-                    className="w-full flex items-center gap-2 p-2 text-sm hover:bg-gray-100"
-                  >
-                    <motion.div whileHover={{ rotate: 15 }}>
-                      <FaUser className="text-gray-600 flex-shrink-0" />
-                    </motion.div>
-                    <span>Profile</span>
-                  </motion.button>
+                  <Link to={`/dashboard/${role ? role : "donor"}/profile`}>
+                    <motion.button
+                      whileHover={{ x: 5 }}
+                      className="w-full flex items-center gap-2 p-2 text-sm hover:bg-gray-100"
+                    >
+                      <motion.div whileHover={{ rotate: 15 }}>
+                        <FaUser className="text-gray-600 flex-shrink-0" />
+                      </motion.div>
+                      <span>Profile</span>
+                    </motion.button>
+                  </Link>
                   <motion.button
                     whileHover={{ x: 5 }}
                     className="w-full flex items-center gap-2 p-2 text-sm hover:bg-gray-100"

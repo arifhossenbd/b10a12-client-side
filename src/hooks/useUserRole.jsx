@@ -7,7 +7,7 @@ const useUserRole = () => {
   const [role, setRole] = useState(null);
   const [userData, setUserData] = useState({});
 
-  const { data, isLoading, error } = useDatabaseData(
+  const { data, isLoading, error, refetch } = useDatabaseData(
     !authLoading && user?.email ? `/users/find?email=${user?.email}` : null,
     {}
   );
@@ -21,14 +21,18 @@ const useUserRole = () => {
     }
   }, [data]);
 
-  return useMemo(() => ({
-    user,
-    userData,
-    role,
-    loading: authLoading || isLoading,
-    error,
-    logout
-  }), [user, userData, role, authLoading, isLoading, error, logout]);
+  return useMemo(
+    () => ({
+      user,
+      userData,
+      role,
+      loading: authLoading || isLoading,
+      error,
+      logout,
+      refetch,
+    }),
+    [user, userData, role, authLoading, isLoading, error, logout, refetch]
+  );
 };
 
 export default useUserRole;
