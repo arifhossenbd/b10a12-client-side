@@ -1,42 +1,38 @@
 import { useQuery } from "@tanstack/react-query";
 import useAxiosPublic from "./useAxiosPublic";
 
-export const useDatabaseData = (endpoint, options = {}) => {
+const useDatabaseData = (endpoint, options = {}) => {
   const { axiosPublic } = useAxiosPublic();
-  const { page = 1, limit = 10, ...filters } = options;
-
+  
   return useQuery({
-    queryKey: [endpoint, { page, limit, ...filters }],
-
+    queryKey: [endpoint, options],
     queryFn: async () => {
-      if (!endpoint) {
-        throw new Error("No endpoint provided");
-      }
-
       const { data } = await axiosPublic.get(endpoint, {
-        params: { page, limit, ...filters },
+        params: options
       });
 
-      if (data?.success === false) {
+      if (!data.success) {
         throw new Error(data.message || "Request failed");
       }
 
+      // console.log(data.meta)
+
+      const allData = data?.data
+      const meta = data?.meta
       return {
-        data: data?.data ?? data,
+        data: allData,
         meta: {
-          total: data?.total ?? 0,
-          page: Number(page),
-          limit: Number(limit),
-          totalPages: Math.ceil((data?.total ?? 0) / limit),
-        },
+          total: meta?.total || 0,
+          page: meta?.page || 1,
+          limit: meta?.limit || options.limit || 10,
+          totalPages: meta?.totalPages || 
+            Math.ceil((meta?.total || 0) / (meta?.limit || options.limit || 10))
+        }
       };
     },
-
-    enabled: !!endpoint,
-    retry: (failureCount, error) => {
-      return error?.response?.status >= 500 && failureCount < 2;
-    },
-    staleTime: 300000,
-    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+    staleTime: 30000
   });
 };
+
+export default useDatabaseData;

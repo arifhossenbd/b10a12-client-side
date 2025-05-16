@@ -12,7 +12,7 @@ const StatItem = ({ label, value }) => (
 );
 
 const HeaderStats = ({ stats }) => {
-  if (!stats || stats.length === 0) return null;
+  if (!stats || stats?.length === 0) return null;
 
   return (
     <div className="hidden md:flex items-center gap-4">

@@ -1,7 +1,7 @@
 import { useFormik } from "formik";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { FaSearch, FaTimes, FaTint } from "react-icons/fa";
+import { FaSearch, FaTint } from "react-icons/fa";
 import LocationSelector from "../../component/LocationSelector/LocationSelector";
 import { COLORS } from "../../utils/colorConfig";
 import CloseBtn from "../../Buttons/CloseBtn";

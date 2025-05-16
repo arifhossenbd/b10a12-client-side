@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
-import { useDatabaseData } from "./useDatabaseData";
 import { useAuth } from "./useAuth";
+import useDatabaseData from "./useDatabaseData";
 
 const useUserRole = () => {
   const { user, loading: authLoading, logout } = useAuth();

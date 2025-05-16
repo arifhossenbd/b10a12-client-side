@@ -1,4 +1,4 @@
-import { FaChartLine, FaHandsHelping, FaHome, FaUsers } from "react-icons/fa";
+import { FaChartLine, FaUsers } from "react-icons/fa";
 import DashboardLayout from "../../../layout/DashboardLayout";
 import useUserRole from "../../../hooks/useUserRole";
 
@@ -17,21 +17,6 @@ const donorNavLinks = [
     path: "/dashboard/donor/my-donation-requests",
     icon: FaUsers,
     description: "Manage donation request",
-  },
-  {
-    id: 3,
-    name: "Create Donation Requests",
-    path: "/dashboard/donor/create-donation-request",
-    icon: FaHandsHelping,
-    description: "Create donation request",
-  },
-  {
-    id: 5,
-    name: "Home",
-    path: "/",
-    icon: FaHome,
-    description: "Go home page",
-    exact: true,
   },
 ];
 

@@ -1,38 +1,35 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PrimaryBtn from "../../Buttons/PrimaryBtn";
-import { useDatabaseData } from "../../hooks/useDatabaseData";
 import DonationRequestCard from "./DonationRequestCard";
 import DonationRequestDetails from "./DonationRequestDetails";
 import { motion, AnimatePresence } from "framer-motion";
 import SecondaryBtn from "../../Buttons/SecondaryBtn";
 import Search from "../Search/Search";
-import { FaHeartbeat, FaSync, FaExclamationTriangle, FaSearch, FaClock } from "react-icons/fa";
+import {
+  FaHeartbeat,
+  FaSync,
+  FaExclamationTriangle,
+  FaSearch,
+  FaClock,
+} from "react-icons/fa";
 import RequestCardSkeleton from "../../component/Skeleton/RequestCardSkeleton";
 import CloseBtn from "../../Buttons/CloseBtn";
+import useDatabaseData from "../../hooks/useDatabaseData";
 
 const DonationRequests = () => {
   const navigate = useNavigate();
   const [selectedRequestId, setSelectedRequestId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { 
-    data, 
-    isLoading, 
-    isRefetching, 
-    refetch, 
-    isError, 
-    error 
-  } = useDatabaseData(
-    "/blood-requests", 
-    {
+  const { data, isLoading, isRefetching, refetch, isError, error } =
+    useDatabaseData("/blood-requests", {
       page: 1,
       limit: 100,
-    },
-  );
+    });
 
   const bloodRequests = data?.data || [];
-  const isNetworkError = error?.code === 'ERR_NETWORK';
+  const isNetworkError = error?.code === "ERR_NETWORK";
   const isEmptyResponse = bloodRequests.length === 0 && !isLoading && !isError;
 
   const handleRefresh = async () => {
@@ -66,7 +63,11 @@ const DonationRequests = () => {
   };
 
   return (
-    <div className={`${isLoading ? "" : `pt-24 py-8`} px-4 lg:w-11/12 mx-auto min-h-screen`}>
+    <div
+      className={`${
+        isLoading ? "" : `pt-24 py-8`
+      } px-4 lg:w-11/12 mx-auto min-h-screen`}
+    >
       {isLoading ? (
         <RequestCardSkeleton count={6} />
       ) : isError ? (
@@ -76,9 +77,9 @@ const DonationRequests = () => {
           className="text-center py-20"
         >
           <motion.div
-            animate={{ 
+            animate={{
               rotate: [0, 10, -10, 0],
-              transition: { repeat: 3, duration: 0.5 }
+              transition: { repeat: 3, duration: 0.5 },
             }}
             className="mb-6"
           >
@@ -93,9 +94,7 @@ const DonationRequests = () => {
               : error?.message || "An unknown error occurred"}
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <PrimaryBtn onClick={() => navigate(-1)}>
-              Go Back
-            </PrimaryBtn>
+            <PrimaryBtn onClick={() => navigate(-1)}>Go Back</PrimaryBtn>
             <SecondaryBtn
               onClick={handleRefresh}
               disabled={isRefetching}
@@ -103,7 +102,10 @@ const DonationRequests = () => {
             >
               {isRefetching ? (
                 <>
-                  <motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}>
+                  <motion.span
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 1 }}
+                  >
                     <FaSync className="text-sm" />
                   </motion.span>
                   Refreshing...
@@ -127,7 +129,7 @@ const DonationRequests = () => {
             </h1>
 
             <p className="text-lg text-gray-600 mb-6">
-              {bloodRequests.length > 0 
+              {bloodRequests.length > 0
                 ? `${bloodRequests.length} urgent requests need your help`
                 : "No active requests currently"}
             </p>
@@ -137,7 +139,7 @@ const DonationRequests = () => {
                 <FaHeartbeat className="mr-2" />
                 Life-Saving Requests
               </span>
-              
+
               {bloodRequests.length > 0 && (
                 <span className="badge badge-lg bg-blue-100 text-blue-600 border-blue-200">
                   <FaClock className="mr-2" />
@@ -154,7 +156,10 @@ const DonationRequests = () => {
               >
                 {isRefetching ? (
                   <>
-                    <motion.span animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1 }}>
+                    <motion.span
+                      animate={{ rotate: 360 }}
+                      transition={{ repeat: Infinity, duration: 1 }}
+                    >
                       <FaSync className="text-sm" />
                     </motion.span>
                     Refreshing...
@@ -168,7 +173,9 @@ const DonationRequests = () => {
               </SecondaryBtn>
 
               <PrimaryBtn
-                onClick={() => document.getElementById("searchModal").showModal()}
+                onClick={() =>
+                  document.getElementById("searchModal").showModal()
+                }
                 className="flex items-center gap-2"
               >
                 <FaSearch className="text-sm" />
@@ -193,10 +200,12 @@ const DonationRequests = () => {
                 </p>
               </div>
               <div className="flex gap-4">
-                <SecondaryBtn onClick={handleRefresh}>
-                  Refresh
-                </SecondaryBtn>
-                <PrimaryBtn onClick={() => document.getElementById("searchModal").showModal()}>
+                <SecondaryBtn onClick={handleRefresh}>Refresh</SecondaryBtn>
+                <PrimaryBtn
+                  onClick={() =>
+                    document.getElementById("searchModal").showModal()
+                  }
+                >
                   Search Donors
                 </PrimaryBtn>
               </div>
@@ -204,7 +213,7 @@ const DonationRequests = () => {
           ) : (
             <>
               {isRefetching && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="fixed top-4 right-4 z-50 bg-white p-2 rounded-full shadow-lg"
@@ -238,8 +247,8 @@ const DonationRequests = () => {
           )}
 
           {/* Details Modal */}
-          <dialog 
-            open={isModalOpen} 
+          <dialog
+            open={isModalOpen}
             onClose={closeModal}
             className="modal modal-middle"
           >
@@ -260,6 +269,7 @@ const DonationRequests = () => {
             </form>
           </dialog>
 
+          {/* Search Modal */}
           <Search />
         </div>
       )}

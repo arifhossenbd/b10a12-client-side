@@ -16,7 +16,9 @@ import {
   FaUser,
   FaCalendarAlt,
   FaHospital,
-  FaEye
+  FaEye,
+  FaEdit,
+  FaTrash
 } from "react-icons/fa";
 
 // Base configuration
@@ -30,7 +32,9 @@ const baseConfig = {
     user: FaUser,
     calendar: FaCalendarAlt,
     hospital: FaHospital,
-    eye: FaEye
+    eye: FaEye,
+    edit: FaEdit,
+    trash: FaTrash
   },
   formats: {
     time: "h:mm A",

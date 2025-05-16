@@ -76,7 +76,7 @@ const Register = () => {
       };
 
       await register(data.email, data.password, data.name, imageUrl);
-      const res = await axiosPublic.post("/donors", donorData);
+      const res = await axiosPublic.post("/users", donorData);
 
       if (res.status === 201) {
         toast.success(

@@ -52,7 +52,7 @@ const Navbar = () => {
     {
       id: 2,
       name: "Profile",
-      path: "/profile",
+      path: `/dashboard/${role ? role : "donor"}/profile`,
       icon: FaUser,
     },
   ];

@@ -1,5 +1,4 @@
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { useDatabaseData } from "../../hooks/useDatabaseData";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import PrimaryBtn from "../../Buttons/PrimaryBtn";
 import SecondaryBtn from "../../Buttons/SecondaryBtn";
 import DonationRequestModal from "../DonationRequestModal/DonationRequestModal";
@@ -7,11 +6,13 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FaHeartbeat, FaMapMarkerAlt, FaUser, FaSync } from "react-icons/fa";
 import { useState } from "react";
 import DonorCardSkeleton from "../../component/Skeleton/DonorCardSkeleton";
+import useDatabaseData from "../../hooks/useDatabaseData";
 
 const SearchResult = () => {
   const [searchParams] = useSearchParams();
-  const [selectedDonor, setSelectedDonor] = useState({});
+  const [selectedDonor, setSelectedDonor] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const queryParams = {};
@@ -31,13 +32,13 @@ const SearchResult = () => {
     {
       ...queryParams,
       page: 1,
-      limit: 100,
+      limit: 10,
     }
   );
 
   const donors = data?.data || [];
   const isEmptyResponse = donors?.length === 0 && !isLoading && !isError;
-  const isNetworkError = error.code === "ERR_NETWORK";
+  const isNetworkError = error && error.code === "ERR_NETWORK";
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -52,7 +53,12 @@ const SearchResult = () => {
 
   const openDonationModal = (donor) => {
     setSelectedDonor(donor);
-    document.getElementById("donationModal").showModal();
+    setIsModalOpen(true);
+  };
+
+  const closeDonationModal = () => {
+    setIsModalOpen(false);
+    setSelectedDonor(null);
   };
 
   // Animation variants
@@ -182,7 +188,7 @@ const SearchResult = () => {
         <motion.p className="text-red-500 mb-6 max-w-md mx-auto items-center">
           {isNetworkError
             ? "Unable to connect to server. Please check your network connection."
-            : error?.message || "An unknown error occurred"}
+            : error.message || "An unknown error occurred"}
         </motion.p>
         <motion.div className="flex gap-4 mt-6">
           <PrimaryBtn
@@ -395,7 +401,7 @@ const SearchResult = () => {
                 <div className="flex items-center mb-4">
                   <motion.div
                     whileHover={{ scale: 1.05 }}
-                    className="bg-red-100 p-3 rounded-full mr-4 flex-shrink-0"
+                    className="bg-red-100 p-2 rounded-full mr-4 flex-shrink-0"
                   >
                     {donor?.image ? (
                       <motion.img
@@ -479,9 +485,16 @@ const SearchResult = () => {
         </AnimatePresence>
       </motion.div>
 
-      <DonationRequestModal donor={selectedDonor} />
+      <AnimatePresence>
+        {isModalOpen && selectedDonor && (
+          <DonationRequestModal
+            donor={selectedDonor}
+            refetch={refetch}
+            onClose={closeDonationModal}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
-
 export default SearchResult;

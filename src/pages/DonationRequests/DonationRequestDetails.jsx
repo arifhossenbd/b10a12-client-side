@@ -5,16 +5,13 @@ import {
   FaCalendarAlt,
   FaMapMarkerAlt,
   FaExclamationTriangle,
-  FaEnvelope,
   FaHistory,
 } from "react-icons/fa";
 import { MdContactless } from "react-icons/md";
-import { useDatabaseData } from "../../hooks/useDatabaseData";
 import { motion } from "framer-motion";
 import toast from "react-hot-toast";
 import { useAuth } from "../../hooks/useAuth";
 import PrimaryBtn from "../../Buttons/PrimaryBtn";
-import SecondaryBtn from "../../Buttons/SecondaryBtn";
 import useAxiosPublic from "../../hooks/useAxiosPublic";
 import { useState, useMemo, useCallback } from "react";
 import { Link } from "react-router-dom";
@@ -34,11 +31,14 @@ import {
   containerVariants,
 } from "../../utils/animation.js";
 import { donationTimeValidate } from "../../utils/donationTimeValidate.js";
+import useCustomToast from "../../hooks/useCustomToast.jsx";
+import useDatabaseData from "../../hooks/useDatabaseData.jsx";
 
-const DonationRequestDetails = ({ requestId, closeModal, refetch }) => {
+const DonationRequestDetails = ({ requestId, refetch }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const { user } = useAuth();
   const { axiosPublic } = useAxiosPublic();
+  const { showConfirmationToast } = useCustomToast();
   const nowTime = useMemo(() => dayjs().toISOString(), []);
 
   const {
@@ -151,223 +151,88 @@ const DonationRequestDetails = ({ requestId, closeModal, refetch }) => {
       return toast.error("You are not eligible to donate to this request");
     }
 
-    closeModal();
-    toast.custom(
-      (t) => {
-        const handleConfirm = async () => {
-          try {
-            setIsProcessing(true);
-            const donationUpdate = {
-              donationStatus: "inprogress",
-              metadata: {
-                ...safeData.metadata,
-                donorId: user?.uid,
-                donorName: user?.displayName,
-                donorEmail: user?.email,
-              },
-              status: {
-                current: "inprogress",
-                history: [
-                  ...(safeData.status.history || []),
-                  {
-                    status: "inprogress",
-                    changedAt: nowTime,
-                    changedBy: {
-                      id: user?.uid,
-                      name: user?.displayName,
-                      email: user?.email,
-                    },
-                  },
-                ],
-              },
-              updatedAt: nowTime,
-            };
-
-            const response = await axiosPublic.patch(
-              `/blood-requests/${_id}`,
-              donationUpdate
-            );
-
-            if (response.data.success) {
-              await detailsRefetch();
-              await refetch();
-              toast.dismiss(t.id);
-              toast.success(
-                () => (
-                  <motion.div className="flex items-center gap-2">
-                    <motion.div
-                      animate={{
-                        scale: [1, 1.2, 1],
-                        rotate: [0, 10, -10, 0],
-                      }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      <FaHeartbeat className="text-green-500" />
-                    </motion.div>
-                    <span>Donation confirmed successfully!</span>
-                  </motion.div>
-                ),
+    showConfirmationToast({
+      title: "Confirm Your Donation",
+      description: `For ${safeData.recipient.name} at ${safeData.recipient.hospital}`,
+      items: [
+        { label: "Patient:", value: safeData.recipient.name },
+        { label: "Requested by:", value: safeData.requester.name },
+      ],
+      contactEmail: safeData.requester.email,
+      confirmText: "Confirm Donation",
+      onConfirm: async () => {
+        try {
+          setIsProcessing(true);
+          const donationUpdate = {
+            donationStatus: "inprogress",
+            metadata: {
+              ...safeData.metadata,
+              donorId: user?.uid,
+              donorName: user?.displayName,
+              donorEmail: user?.email,
+            },
+            status: {
+              current: "inprogress",
+              history: [
+                ...(safeData.status.history || []),
                 {
-                  position: "top-center",
-                  duration: 2000,
-                }
-              );
-            }
-          } catch (error) {
-            console.error("Error:", error);
-            toast.error(
-              error?.response?.data?.message ||
-                error?.message ||
-                "Something went wrong"
-            );
-          } finally {
-            setIsProcessing(false);
-          }
-        };
-
-        return (
-          <motion.div
-            initial={{ opacity: 0, y: -50, scale: 0.9 }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              transition: {
-                type: "spring",
-                damping: 20,
-                stiffness: 300,
-                mass: 0.5,
-              },
-            }}
-            exit={{
-              opacity: 0,
-              y: -20,
-              scale: 0.95,
-              transition: { duration: 0.2 },
-            }}
-            className="relative bg-white rounded-xl shadow-2xl border border-gray-200 w-full max-w-md mx-auto p-4 sm:p-6 space-y-4 z-[9999] backdrop-blur-sm"
-          >
-            <motion.div
-              animate={{
-                y: [0, -5, 0],
-                transition: {
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
+                  status: "inprogress",
+                  changedAt: nowTime,
+                  changedBy: {
+                    id: user?.uid,
+                    name: user?.displayName,
+                    email: user?.email,
+                  },
                 },
-              }}
-              className="absolute -top-3 -right-3 bg-white p-2 rounded-full shadow-md"
-            >
-              <motion.div
-                animate={{
-                  scale: [1, 1.1, 1],
-                  transition: { repeat: Infinity, duration: 1.5 },
-                }}
-                className="bg-red-100 p-2 rounded-full"
-              >
-                <FaHeartbeat className="text-red-500 text-xl" />
-              </motion.div>
-            </motion.div>
+              ],
+            },
+            updatedAt: nowTime,
+          };
 
-            <div className="flex items-start gap-3 sm:gap-4">
-              <div>
-                <motion.h3 className="font-bold text-lg sm:text-xl text-gray-800">
-                  Confirm Your Donation
-                </motion.h3>
-                <motion.p className="text-gray-600 text-sm mt-1">
-                  For{" "}
-                  <span className="font-medium text-red-600">
-                    {safeData.recipient.name}
-                  </span>{" "}
-                  at{" "}
-                  <span className="font-medium">
-                    {safeData.recipient.hospital}
-                  </span>
-                </motion.p>
-              </div>
-            </div>
+          const response = await axiosPublic.patch(
+            `/blood-requests/${_id}`,
+            donationUpdate
+          );
 
-            <motion.div className="space-y-3 pt-2">
-              {[
-                { label: "Patient:", value: safeData.recipient.name },
-                { label: "Requested by:", value: safeData.requester.name },
-              ].map((item, index) => (
-                <motion.div
-                  key={index}
-                  className="flex justify-between items-center"
-                >
-                  <span className="text-gray-500 text-xs md:text-sm">
-                    {item.label}
-                  </span>
-                  <span className="text-gray-700 font-medium text-right break-all">
-                    {item.value}
-                  </span>
+          if (response.data.success) {
+            await detailsRefetch();
+            await refetch();
+            toast.success(
+              () => (
+                <motion.div className="flex items-center gap-2">
+                  <motion.div
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      rotate: [0, 10, -10, 0],
+                    }}
+                    transition={{ duration: 0.6 }}
+                  >
+                    <FaHeartbeat className="text-green-500" />
+                  </motion.div>
+                  <span>Donation confirmed successfully!</span>
                 </motion.div>
-              ))}
-
-              <motion.div className="flex justify-between items-center pt-2">
-                <span className="text-gray-500 text-xs md:text-sm">
-                  Contact Requester:
-                </span>
-                <a
-                  href={`mailto:${safeData.requester.email}`}
-                  className="text-blue-600 hover:text-blue-700 flex items-center text-sm font-medium"
-                >
-                  <FaEnvelope className="mr-1.5" />
-                  <span>Send Email</span>
-                </a>
-              </motion.div>
-            </motion.div>
-
-            <motion.div className="flex flex-wrap justify-end gap-3 pt-4">
-              <SecondaryBtn
-                onClick={() => toast.dismiss(t.id)}
-                type="button"
-                style="bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 hover:text-gray-900 px-3 sm:px-4 rounded-md cursor-pointer py-1.5 sm:py-2"
-              >
-                Cancel
-              </SecondaryBtn>
-              <PrimaryBtn
-                onClick={handleConfirm}
-                disabled={isProcessing || !canDonate}
-              >
-                {isProcessing ? (
-                  <span className="flex items-center gap-2">
-                    <svg
-                      className="animate-spin h-4 w-4 text-white"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
-                    Processing...
-                  </span>
-                ) : (
-                  <span>Confirm Donation</span>
-                )}
-              </PrimaryBtn>
-            </motion.div>
-          </motion.div>
-        );
+              ),
+              {
+                position: "top-center",
+                duration: 2000,
+              }
+            );
+          }
+        } catch (error) {
+          console.error("Error:", error);
+          toast.error(
+            error?.response?.data?.message ||
+              error?.message ||
+              "Something went wrong"
+          );
+        } finally {
+          setIsProcessing(false);
+        }
       },
-      { duration: Infinity, position: "top-center" }
-    );
+    });
   }, [
     _id,
     isRequester,
-    isProcessing,
-    closeModal,
     donationProcess,
     detailsRefetch,
     refetch,
@@ -376,6 +241,7 @@ const DonationRequestDetails = ({ requestId, closeModal, refetch }) => {
     user,
     axiosPublic,
     canDonate,
+    showConfirmationToast,
   ]);
 
   if (isLoading) {
@@ -674,63 +540,13 @@ const DonationRequestDetails = ({ requestId, closeModal, refetch }) => {
                   const changedAt = item?.changedAt;
                   const changedByValue = item?.changedBy;
                   const historyStatusConfig = getStatusConfig(statusValue);
-                  const isCurrent = safeData.status.current === statusValue;
+                  const isCurrent =
+                    index === 0 && safeData.status.current === item.status;
                   const isLastItem = index === array.length - 1;
 
                   return (
                     <li key={index}>
                       {index !== 0 && <hr className="bg-gray-200" />}
-
-                      {index % 2 === 0 ? (
-                        <motion.div className="timeline-start timeline-box w-full">
-                          <div className="font-medium text-sm sm:text-base">
-                            {historyStatusConfig?.label}
-                          </div>
-                          <div className="flex flex-col sm:flex-row align-baseline gap-1 sm:gap-2">
-                            <div>
-                              <div className="text-xs text-gray-500">
-                                {formatDate(changedAt)} •{" "}
-                                {formatTime(changedAt)}
-                              </div>
-                              {changedByValue && (
-                                <div className="text-xs text-gray-400 mt-1">
-                                  Changed by:{" "}
-                                  {typeof changedByValue === "string"
-                                    ? changedByValue
-                                    : changedByValue?.name || "System"}
-                                </div>
-                              )}
-                            </div>
-                            {isCurrent && (
-                              <div className="badge badge-sm sm:badge-md badge-primary mt-1 sm:mt-0">
-                                Current
-                              </div>
-                            )}
-                          </div>
-                        </motion.div>
-                      ) : (
-                        <motion.div className="timeline-end timeline-box w-full">
-                          <div className="font-medium text-sm sm:text-base">
-                            {historyStatusConfig?.label}
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            {formatDate(changedAt)} • {formatTime(changedAt)}
-                          </div>
-                          {changedByValue && (
-                            <div className="text-xs text-gray-400 mt-1">
-                              Changed by:{" "}
-                              {typeof changedByValue === "string"
-                                ? changedByValue
-                                : changedByValue?.name || "System"}
-                            </div>
-                          )}
-                          {isCurrent && (
-                            <div className="badge badge-sm sm:badge-md badge-primary mt-1">
-                              Current
-                            </div>
-                          )}
-                        </motion.div>
-                      )}
 
                       <div className="timeline-middle">
                         <div
@@ -739,6 +555,36 @@ const DonationRequestDetails = ({ requestId, closeModal, refetch }) => {
                           <historyStatusConfig.Icon
                             className={`${historyStatusConfig?.iconColor} h-3 w-3 sm:h-4 sm:w-4`}
                           />
+                        </div>
+                      </div>
+
+                      <div
+                        className={`timeline-${
+                          index % 2 === 0 ? "start" : "end"
+                        } timeline-box w-full`}
+                      >
+                        <div className="flex flex-col md:flex-row justify-between items-start gap-2 md:gap-0">
+                          <div>
+                            <div className="font-medium text-sm sm:text-base">
+                              {historyStatusConfig?.label}
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              {formatDate(changedAt)} • {formatTime(changedAt)}
+                            </div>
+                            {changedByValue && (
+                              <div className="text-xs text-gray-400 mt-1">
+                                Changed by:{" "}
+                                {typeof changedByValue === "string"
+                                  ? changedByValue
+                                  : changedByValue?.name || "System"}
+                              </div>
+                            )}
+                          </div>
+                            {isCurrent && (
+                              <div className="badge badge-sm sm:badge-md badge-primary ml-2 flex-1/2 md:flex-none">
+                                Current
+                              </div>
+                            )}
                         </div>
                       </div>
 
