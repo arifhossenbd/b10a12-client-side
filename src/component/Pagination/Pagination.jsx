@@ -43,7 +43,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="btn btn-sm text-base flex flex-col items-center justify-center"
+        className="btn btn-sm text-sm md:text-base flex flex-col items-center justify-center"
         onClick={() => onPageChange(1)}
         disabled={currentPage === 1}
       >
@@ -53,7 +53,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="btn btn-sm text-base flex flex-col items-center justify-center"
+        className="btn btn-sm text-sm md:text-base flex flex-col items-center justify-center"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
       >
@@ -65,7 +65,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
           key={page}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className={`btn btn-sm text-base md:text-lg flex flex-col items-center justify-center ${
+          className={`btn btn-sm text-sm md:text-base flex flex-col items-center justify-center ${
             currentPage === page ? "btn-active" : ""
           }`}
           onClick={() => onPageChange(page)}
@@ -77,7 +77,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="btn btn-sm text-base flex flex-col items-center justify-center"
+        className="btn btn-sm text-sm md:text-base flex flex-col items-center justify-center"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
       >
@@ -87,7 +87,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
       <motion.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="btn btn-sm text-base flex flex-col items-center justify-center"
+        className="btn btn-sm text-sm md:text-base flex flex-col items-center justify-center"
         onClick={() => onPageChange(totalPages)}
         disabled={currentPage === totalPages}
       >

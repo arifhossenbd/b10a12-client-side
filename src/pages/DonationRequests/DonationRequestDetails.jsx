@@ -22,7 +22,6 @@ import {
   getStatusConfig,
   getUrgencyConfig,
   getBloodGroupConfig,
-  baseConfig,
 } from "../../utils/config.jsx";
 import {
   scrollYAnimation,
@@ -33,6 +32,7 @@ import {
 import { donationTimeValidate } from "../../utils/donationTimeValidate.js";
 import useCustomToast from "../../hooks/useCustomToast.jsx";
 import useDatabaseData from "../../hooks/useDatabaseData.jsx";
+import StatusBadge from "../Dashboard/component/StatusBadge.jsx";
 
 const DonationRequestDetails = ({ requestId, refetch }) => {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -62,7 +62,7 @@ const DonationRequestDetails = ({ requestId, refetch }) => {
     updatedAt = nowTime,
   } = requestData;
 
-  // Get configs using your imported functions
+  // Get configs
   const urgencyConfig = getUrgencyConfig(donationInfo?.urgency);
   const statusConfig = getStatusConfig(status);
   const bloodGroupConfig = getBloodGroupConfig(donationInfo?.bloodGroup);
@@ -125,7 +125,8 @@ const DonationRequestDetails = ({ requestId, refetch }) => {
 
   const donationProcess = donationStatus === "inprogress" && !isAssignedDonor;
 
-  const handleDonateClick = useCallback(() => {
+  const handleDonateClick = useCallback(async () => {
+    // Validation checks
     if (
       !donationTimeValidate(
         safeData.donationInfo.requiredDate,
@@ -151,85 +152,93 @@ const DonationRequestDetails = ({ requestId, refetch }) => {
       return toast.error("You are not eligible to donate to this request");
     }
 
-    showConfirmationToast({
-      title: "Confirm Your Donation",
-      description: `For ${safeData.recipient.name} at ${safeData.recipient.hospital}`,
-      items: [
-        { label: "Patient:", value: safeData.recipient.name },
-        { label: "Requested by:", value: safeData.requester.name },
-      ],
-      contactEmail: safeData.requester.email,
-      confirmText: "Confirm Donation",
-      onConfirm: async () => {
-        try {
-          setIsProcessing(true);
-          const donationUpdate = {
-            donationStatus: "inprogress",
-            metadata: {
-              ...safeData.metadata,
-              donorId: user?.uid,
-              donorName: user?.displayName,
-              donorEmail: user?.email,
-            },
-            status: {
-              current: "inprogress",
-              history: [
-                ...(safeData.status.history || []),
-                {
-                  status: "inprogress",
-                  changedAt: nowTime,
-                  changedBy: {
-                    id: user?.uid,
-                    name: user?.displayName,
-                    email: user?.email,
-                  },
-                },
-              ],
-            },
-            updatedAt: nowTime,
-          };
+    try {
+      const confirmed = await showConfirmationToast({
+        title: "Confirm Your Donation",
+        description: `For ${safeData.recipient.name} at ${safeData.recipient.hospital}`,
+        items: [
+          { label: "Patient:", value: safeData.recipient.name },
+          { label: "Blood Group:", value: safeData.donationInfo.bloodGroup },
+          { label: "Requested by:", value: safeData.requester.name },
+        ],
+        contactEmail: safeData.requester.email,
+        confirmText: "Confirm Donation",
+      });
 
-          const response = await axiosPublic.patch(
-            `/blood-requests/${_id}`,
-            donationUpdate
-          );
+      if (!confirmed) return;
 
-          if (response.data.success) {
-            await detailsRefetch();
-            await refetch();
-            toast.success(
-              () => (
-                <motion.div className="flex items-center gap-2">
-                  <motion.div
-                    animate={{
-                      scale: [1, 1.2, 1],
-                      rotate: [0, 10, -10, 0],
-                    }}
-                    transition={{ duration: 0.6 }}
-                  >
-                    <FaHeartbeat className="text-green-500" />
-                  </motion.div>
-                  <span>Donation confirmed successfully!</span>
-                </motion.div>
-              ),
-              {
-                position: "top-center",
-                duration: 2000,
-              }
-            );
+      setIsProcessing(true);
+
+      const donationUpdate = {
+        donationStatus: "inprogress",
+        metadata: {
+          ...safeData.metadata,
+          donorId: user?.uid,
+          donorName: user?.displayName,
+          donorEmail: user?.email,
+        },
+        status: {
+          current: "inprogress",
+          history: [
+            ...(safeData.status.history || []),
+            {
+              status: "inprogress",
+              changedAt: nowTime,
+              changedBy: {
+                id: user?.uid,
+                name: user?.displayName,
+                email: user?.email,
+              },
+            },
+          ],
+        },
+        updatedAt: nowTime,
+      };
+
+      const response = await axiosPublic.patch(
+        `/blood-requests/${_id}`,
+        donationUpdate
+      );
+
+      if (response.data.success) {
+        // Force refresh data
+        await Promise.all([detailsRefetch(), refetch()]);
+
+        toast.success(
+          () => (
+            <motion.div className="flex items-center gap-2">
+              <motion.div
+                animate={{
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 10, -10, 0],
+                }}
+                transition={{ duration: 0.6 }}
+              >
+                <FaHeartbeat className="text-green-500" />
+              </motion.div>
+              <span>Donation confirmed successfully!</span>
+            </motion.div>
+          ),
+          {
+            duration: 2000,
           }
-        } catch (error) {
-          console.error("Error:", error);
-          toast.error(
-            error?.response?.data?.message ||
-              error?.message ||
-              "Something went wrong"
-          );
-        } finally {
-          setIsProcessing(false);
-        }
-      },
-    });
+        );
+      } else {
+        throw new Error(response.data.message || "Update failed");
+      }
+    } catch (error) {
+      console.error("Donation error:", {
+        message: error.message,
+        response: error.response?.data,
+      });
+      toast.error(
+        error?.response?.data?.message ||
+          error?.message ||
+          "Failed to confirm donation"
+      );
+    } finally {
+      setIsProcessing(false);
+    }
   }, [
     _id,
     isRequester,
@@ -276,16 +285,13 @@ const DonationRequestDetails = ({ requestId, refetch }) => {
       className="space-y-4 md:space-y-6 lg:space-y-8"
     >
       {/* Header Section */}
-      <motion.div
-        {...scrollYAnimation}
-        transition={{ duration: 0.7, delay: 0.1 }}
-      >
+      <motion.div {...scrollYAnimation} transition={{ duration: 0.8 }}>
         <motion.div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-4">
           <div className="bg-red-100 p-3 rounded-full flex-shrink-0">
             <FaUser className="text-red-500 text-xl" />
           </div>
           <motion.div className="flex-1">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 break-words">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-800 break-words max-w-xl">
               {safeData.recipient.name || "Recipient Name Not Available"}
             </h2>
             <p className="text-gray-600 text-sm sm:text-base">
@@ -316,7 +322,7 @@ const DonationRequestDetails = ({ requestId, refetch }) => {
             {/* Contact Information */}
             <motion.div
               {...scrollLeftAnimation}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.8 }}
               className="bg-white p-4 sm:p-5 rounded-lg shadow-sm border border-gray-100"
             >
               <h3 className="font-bold text-lg sm:text-xl text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
@@ -345,7 +351,6 @@ const DonationRequestDetails = ({ requestId, refetch }) => {
             {/* Medical Info */}
             <motion.div
               {...scrollYAnimation}
-              transition={{ duration: 1, delay: 0.5 }}
               className="bg-white p-4 sm:p-5 rounded-lg shadow-sm border border-gray-100"
             >
               <h3 className="font-bold text-lg sm:text-xl text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
@@ -407,7 +412,7 @@ const DonationRequestDetails = ({ requestId, refetch }) => {
             {/* Location Details */}
             <motion.div
               {...scrollRightAnimation}
-              transition={{ duration: 1, delay: 0.2 }}
+              transition={{ duration: 0.8 }}
               className="bg-white p-4 sm:p-5 rounded-lg shadow-sm border border-gray-100"
             >
               <h3 className="font-bold text-lg sm:text-xl text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
@@ -421,24 +426,14 @@ const DonationRequestDetails = ({ requestId, refetch }) => {
                     {safeData.recipient.hospital || "Hospital not specified"}
                   </p>
                   <p className="text-gray-600 text-sm mt-1">
-                    {safeData.location.fullAddress && (
-                      <span>{safeData.location.fullAddress}, </span>
-                    )}
-                    {safeData.location.upazila && (
-                      <span>{safeData.location.upazila}, </span>
-                    )}
-                    {safeData.location.district && (
-                      <span>{safeData.location.district}, </span>
-                    )}
-                    {safeData.location.division && (
-                      <span>{safeData.location.division}</span>
-                    )}
-                    {!safeData.location.fullAddress &&
-                      !safeData.location.upazila &&
-                      !safeData.location.district &&
-                      !safeData.location.division && (
-                        <span>Location not specified</span>
-                      )}
+                    {[
+                      safeData.location.fullAddress,
+                      safeData.location.upazila,
+                      safeData.location.district,
+                      safeData.location.division,
+                    ]
+                      .filter(Boolean)
+                      .join(", ") || "Location not specified"}
                   </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -481,7 +476,7 @@ const DonationRequestDetails = ({ requestId, refetch }) => {
             {safeData.metadata.donorName && (
               <motion.div
                 {...scrollRightAnimation}
-                transition={{ duration: 0.6, delay: 0.2 }}
+                transition={{ duration: 0.7 }}
                 className="bg-white p-4 sm:p-5 rounded-lg shadow-sm border border-gray-100"
               >
                 <h3 className="font-bold text-lg sm:text-xl text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
@@ -523,7 +518,7 @@ const DonationRequestDetails = ({ requestId, refetch }) => {
         {/* Status History Section */}
         <motion.div
           {...scrollYAnimation}
-          transition={{ duration: 0.8, delay: 0.5, stiffness: 0.1 }}
+          transition={{ duration: 0.6 }}
           className="bg-white p-4 sm:p-5 rounded-lg shadow-sm border border-gray-100 mb-6 sm:mb-8"
         >
           <h3 className="font-bold text-lg sm:text-xl text-gray-800 mb-3 sm:mb-4 flex items-center gap-2">
@@ -580,11 +575,7 @@ const DonationRequestDetails = ({ requestId, refetch }) => {
                               </div>
                             )}
                           </div>
-                            {isCurrent && (
-                              <div className="badge badge-sm sm:badge-md badge-primary ml-2 flex-1/2 md:flex-none">
-                                Current
-                              </div>
-                            )}
+                          {isCurrent && <StatusBadge status="Current" />}
                         </div>
                       </div>
 
@@ -604,7 +595,7 @@ const DonationRequestDetails = ({ requestId, refetch }) => {
       {/* Action Buttons */}
       <motion.div
         {...scrollYAnimation}
-        transition={{ duration: 0.6, delay: 0.2, stiffness: 0.1 }}
+        transition={{ duration: 0.5 }}
         className="flex justify-end border-t border-t-gray-200 pt-4 sm:pt-6"
       >
         {!donationTimeValidate(
@@ -617,22 +608,13 @@ const DonationRequestDetails = ({ requestId, refetch }) => {
           </div>
         ) : (
           <PrimaryBtn
-            toolTipText={
-              donationStatus === "inprogress" && !isAssignedDonor
-                ? "Donation already in progress"
-                : isRequester
-                ? "You cannot donate to your own request"
-                : donationStatus === "inprogress" && isAssignedDonor
-                ? "You are already donating for this request"
-                : "I can donate to this request"
-            }
             onClick={handleDonateClick}
             disabled={
               isProcessing ||
               !canDonate ||
               (donationStatus === "inprogress" && !isAssignedDonor)
             }
-            style="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto text-sm sm:text-base py-2 sm:py-3 px-4 sm:px-6 tooltip tooltip-info tooltip-top md:tooltip-left"
+            style="bg-red-500 hover:bg-red-600 text-white w-full sm:w-auto text-sm sm:text-base py-2 sm:py-3 px-4 sm:px-6"
           >
             {isProcessing
               ? "Processing..."

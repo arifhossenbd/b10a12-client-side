@@ -1,37 +1,46 @@
-import { useQuery } from "@tanstack/react-query";
 import useAxiosPublic from "./useAxiosPublic";
+import { useQuery } from "@tanstack/react-query";
 
 const useDatabaseData = (endpoint, options = {}) => {
   const { axiosPublic } = useAxiosPublic();
-  
+
   return useQuery({
     queryKey: [endpoint, options],
     queryFn: async () => {
-      const { data } = await axiosPublic.get(endpoint, {
-        params: options
-      });
+      try {
+        const { data } = await axiosPublic.get(endpoint, { params: options });
 
-      if (!data.success) {
-        throw new Error(data.message || "Request failed");
-      }
-
-      // console.log(data.meta)
-
-      const allData = data?.data
-      const meta = data?.meta
-      return {
-        data: allData,
-        meta: {
-          total: meta?.total || 0,
-          page: meta?.page || 1,
-          limit: meta?.limit || options.limit || 10,
-          totalPages: meta?.totalPages || 
-            Math.ceil((meta?.total || 0) / (meta?.limit || options.limit || 10))
+        if (!data.success) {
+          throw new Error(data.message || "Request failed");
         }
-      };
+
+        return {
+          data: data?.data,
+          meta: {
+            total: data?.meta?.total || 0,
+            page: data?.meta?.page || 1,
+            limit: data?.meta?.limit || options.limit || 10,
+            totalPages:
+              data?.meta?.totalPages ||
+              Math.ceil(
+                (data?.meta?.total || 0) /
+                  (data?.meta?.limit || options.limit || 10)
+              ),
+            hasNext: data?.meta?.hasNext || false,
+            hasPrev: data?.meta?.hasPrev || false,
+          },
+        };
+      } catch (error) {
+        if (error.response?.status === 404) {
+          throw new Error("Data not found");
+        }
+        throw error;
+      }
     },
     keepPreviousData: true,
-    staleTime: 30000
+    staleTime: 30000,
+    retry: 2, // Add retry for transient errors
+    retryDelay: 1000,
   });
 };
 

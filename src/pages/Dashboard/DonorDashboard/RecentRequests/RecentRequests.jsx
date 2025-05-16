@@ -99,7 +99,9 @@ const RecentRequests = () => {
       {/* Main Content */}
       {recentRequests?.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-8">
-          <p className="text-red-500 text-sm md:text-base">No recent requests found</p>
+          <p className="text-red-500 text-sm md:text-base">
+            No recent requests found
+          </p>
         </div>
       ) : (
         <div className="overflow-x-auto rounded-lg shadow-sm border border-gray-100">
@@ -122,9 +124,13 @@ const RecentRequests = () => {
             <tbody>
               <AnimatePresence>
                 {recentRequests?.map((request) => {
-                  const statusConfig = getStatusConfig(request?.status?.current);
+                  const statusConfig = getStatusConfig(
+                    request?.status?.current
+                  );
                   const StatusIcon = statusConfig.Icon;
-                  const bloodGroupConfig = getBloodGroupConfig(request?.donationInfo?.bloodGroup);
+                  const bloodGroupConfig = getBloodGroupConfig(
+                    request?.donationInfo?.bloodGroup
+                  );
                   const BloodGroupIcon = bloodGroupConfig.Icon;
 
                   return (
@@ -143,7 +149,8 @@ const RecentRequests = () => {
                           </h2>
                           <p className="text-xs md:text-sm opacity-50 flex items-center gap-1 mt-1">
                             <baseConfig.icons.hospital className="text-xs" />
-                            {request?.recipient?.hospital || "Hospital not specified"}
+                            {request?.recipient?.hospital ||
+                              "Hospital not specified"}
                           </p>
                         </div>
                       </td>
@@ -156,10 +163,18 @@ const RecentRequests = () => {
                       <td>
                         <address className="not-italic">
                           <p className="text-sm md:text-base">
-                            {request?.location?.district || "District not specified"}
+                            {request?.location?.district ||
+                              "District not specified"}
+                            ,
                           </p>
                           <p className="text-xs md:text-sm opacity-50">
-                            {request?.location?.upazila || "Upazila not specified"}
+                            {request?.location?.upazila ||
+                              "Upazila not specified"}
+                            ,
+                          </p>
+                          <p className="text-xs md:text-sm opacity-50">
+                            {request?.location?.fullAddress ||
+                              "Full address not specified"}
                           </p>
                         </address>
                       </td>
@@ -182,14 +197,17 @@ const RecentRequests = () => {
                       <td>
                         <div className="flex items-center gap-1 md:gap-2">
                           <StatusIcon className="text-sm md:text-base" />
-                          <StatusBadge status={request?.status?.current || "unknown"} />
+                          <StatusBadge
+                            status={request?.status?.current || "unknown"}
+                          />
                         </div>
-                        {request?.status?.current === "inprogress" && request?.donor && (
-                          <div className="mt-1 text-xs opacity-50">
-                            <p>Donor: {request?.donor.name}</p>
-                            <p>Email: {request?.donor.email}</p>
-                          </div>
-                        )}
+                        {request?.status?.current === "inprogress" &&
+                          request?.donor && (
+                            <div className="mt-1 text-xs opacity-50">
+                              <p>Donor: {request?.donor.name}</p>
+                              <p>Email: {request?.donor.email}</p>
+                            </div>
+                          )}
                       </td>
                       <td className="pr-4 md:pr-6">
                         <div className="flex justify-end gap-1 md:gap-2">
@@ -200,7 +218,8 @@ const RecentRequests = () => {
                               setSelectedRequestId(request?._id);
                               setIsDetailsModalOpen(true);
                             }}
-                            className="btn btn-ghost btn-xs text-gray-500 hover:text-primary"
+                            className="btn btn-ghost btn-xs text-gray-500 hover:text-primary tooltip tooltip-info"
+                            data-tip="Details"
                           >
                             <baseConfig.icons.eye className="w-3 h-3 md:w-4 md:h-4" />
                           </motion.button>
@@ -214,11 +233,15 @@ const RecentRequests = () => {
                                   setEditRequestData(request);
                                   setIsEditModalOpen(true);
                                 }}
-                                className="btn btn-ghost btn-xs text-gray-500 hover:text-success"
+                                className="btn btn-ghost btn-xs text-gray-500 hover:text-success tooltip tooltip-accent"
+                                data-tip="Edit"
                               >
                                 <baseConfig.icons.edit className="w-3 h-3 md:w-4 md:h-4" />
                               </motion.button>
-                              <motion.button className="btn btn-ghost btn-xs text-gray-500 hover:text-error">
+                              <motion.button
+                                className="btn btn-ghost btn-xs text-gray-500 hover:text-error tooltip tooltip-warning"
+                                data-tip="Delete"
+                              >
                                 <baseConfig.icons.trash className="w-3 h-3 md:w-4 md:h-4" />
                               </motion.button>
                             </>
@@ -226,10 +249,16 @@ const RecentRequests = () => {
 
                           {request?.status?.current === "inprogress" && (
                             <>
-                              <motion.button className="btn btn-ghost btn-xs text-success hover:text-success">
+                              <motion.button
+                                className="btn btn-ghost btn-xs text-success hover:text-success tooltip tooltip-success"
+                                data-tip="Complete"
+                              >
                                 <baseConfig.icons.check className="w-3 h-3 md:w-4 md:h-4" />
                               </motion.button>
-                              <motion.button className="btn btn-ghost btn-xs text-error hover:text-error">
+                              <motion.button
+                                className="btn btn-ghost btn-xs text-error hover:text-error tooltip tooltip-warning"
+                                data-tip="Cancel"
+                              >
                                 <baseConfig.icons.times className="w-3 h-3 md:w-4 md:h-4" />
                               </motion.button>
                             </>

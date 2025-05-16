@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../../../hooks/useAuth";
 import useDatabaseData from "../../../../hooks/useDatabaseData";
@@ -15,7 +14,9 @@ import CloseBtn from "../../../../Buttons/CloseBtn";
 import DonationRequestModal from "../../../DonationRequestModal/DonationRequestModal";
 import StatusBadge from "../../component/StatusBadge";
 import Pagination from "../../../../component/Pagination/Pagination";
-import { FaFilter } from "react-icons/fa";
+import useCustomToast from "../../../../hooks/useCustomToast";
+import useAxiosPublic from "../../../../hooks/useAxiosPublic";
+import toast from "react-hot-toast";
 
 const MyDonationRequests = () => {
   const { user } = useAuth();
@@ -24,7 +25,8 @@ const MyDonationRequests = () => {
   const [editRequestData, setEditRequestData] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState("all");
+  const { showConfirmationToast } = useCustomToast();
+  const { axiosPublic } = useAxiosPublic();
   const itemsPerPage = 5;
 
   const {
@@ -32,14 +34,10 @@ const MyDonationRequests = () => {
     isLoading,
     refetch,
   } = useDatabaseData(
-    `/donations/my-requests?email=${
-      user?.email
-    }&page=${currentPage}&limit=${itemsPerPage}${
-      statusFilter !== "all" ? `&status=${statusFilter}` : ""
-    }`
+    `/donations/my-requests?email=${user?.email}&page=${currentPage}&limit=${itemsPerPage}`
   );
 
-  const recentRequests = responseData?.data || [];
+  const myRequests = responseData?.data || [];
   const meta = responseData?.meta || {};
 
   const tableVariants = {
@@ -66,6 +64,32 @@ const MyDonationRequests = () => {
     );
   }
 
+  const handleDeleteRequest = async (requestId) => {
+    try {
+      const confirmed = await showConfirmationToast({
+        title: "Delete Request",
+        description: "Are you sure you want to delete this donation request?",
+        confirmText: "Delete",
+        cancelText: "Cancel",
+        icon: "trash",
+      });
+
+      if (!confirmed) return;
+
+      const response = await axiosPublic.delete(
+        `/donations/my-requests/${requestId}/?email=${user?.email}`
+      );
+
+      if (response.data.success) {
+        toast.success("Donation request deleted successfully");
+        await refetch();
+      }
+    } catch (error) {
+      console.error("Delete request error:", error);
+      toast.error(error.response?.data?.message || "Failed to delete request");
+    }
+  };
+
   return (
     <motion.section
       initial={{ opacity: 0 }}
@@ -73,7 +97,7 @@ const MyDonationRequests = () => {
       transition={{ duration: 0.3 }}
       className="w-full p-4 md:p-6 py-6 md:py-8 lg:py-10"
     >
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <header className="mb-6 gap-4">
         <motion.h1
           initial={{ x: -10 }}
           animate={{ x: 0 }}
@@ -82,31 +106,9 @@ const MyDonationRequests = () => {
           <baseConfig.icons.heartbeat className="text-red-500" />
           Donation Requests
         </motion.h1>
-        <div className="join">
-          <button className="btn join-item btn-sm font-semibold bg-stone-100 hover:bg-stone-200 hover:border-stone-300">
-            <FaFilter className="mr-1" />
-            Filter:
-          </button>
-          <select
-            className="select select-bordered join-item select-sm border-l-0 border-stone-200 
-            outline-none focus:outline-none focus:ring-0 focus:border-stone-300 hover:bg-stone-100 hover:border-stone-200 focus:bg-stone-200
-            text-sm font-semibold cursor-pointer"
-            value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              setCurrentPage(1);
-            }}
-          >
-            <option value="all">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="inprogress">In Progress</option>
-            <option value="completed">Completed</option>
-            <option value="canceled">Canceled</option>
-          </select>
-        </div>
       </header>
 
-      {recentRequests?.length ? (
+      {myRequests?.length ? (
         <>
           <div className="overflow-x-auto rounded-lg shadow-sm border border-gray-100">
             <motion.table
@@ -127,10 +129,14 @@ const MyDonationRequests = () => {
               </thead>
               <tbody>
                 <AnimatePresence>
-                  {recentRequests?.map((request) => {
-                    const statusConfig = getStatusConfig(request?.status?.current);
+                  {myRequests?.map((request) => {
+                    const statusConfig = getStatusConfig(
+                      request?.status?.current
+                    );
                     const StatusIcon = statusConfig.Icon;
-                    const bloodGroupConfig = getBloodGroupConfig(request?.donationInfo?.bloodGroup);
+                    const bloodGroupConfig = getBloodGroupConfig(
+                      request?.donationInfo?.bloodGroup
+                    );
                     const BloodGroupIcon = bloodGroupConfig.Icon;
 
                     return (
@@ -149,7 +155,8 @@ const MyDonationRequests = () => {
                             </h2>
                             <p className="text-xs md:text-sm opacity-50 flex items-center gap-1 mt-1">
                               <baseConfig.icons.hospital className="text-xs" />
-                              {request?.recipient?.hospital || "Hospital not specified"}
+                              {request?.recipient?.hospital ||
+                                "Hospital not specified"}
                             </p>
                           </div>
                         </td>
@@ -162,10 +169,18 @@ const MyDonationRequests = () => {
                         <td className="py-3 md:py-4">
                           <address className="not-italic">
                             <p className="text-sm md:text-base">
-                              {request?.location?.district || "District not specified"}
+                              {request?.location?.district ||
+                                "District not specified"}
+                              ,
                             </p>
                             <p className="text-xs md:text-sm opacity-50">
-                              {request?.location?.upazila || "Upazila not specified"}
+                              {request?.location?.upazila ||
+                                "Upazila not specified"}
+                              ,
+                            </p>
+                            <p className="text-xs md:text-sm opacity-50">
+                              {request?.location?.fullAddress ||
+                                "Full address not specified"}
                             </p>
                           </address>
                         </td>
@@ -186,9 +201,11 @@ const MyDonationRequests = () => {
                           </div>
                         </td>
                         <td className="py-3 md:py-4">
-                          <div className="flex items-center gap-1 md:gap-2">
-                            <StatusIcon className="text-sm md:text-base" />
-                            <StatusBadge status={request?.status?.current || "unknown"} />
+                          <div className="flex items-center gap-1 md:gap-2 text-xs md:text-sm lg:text-base">
+                            <StatusIcon />
+                            <StatusBadge
+                              status={request?.status?.current || "unknown"}
+                            />
                           </div>
                           {request?.status?.current === "inprogress" &&
                             request?.donor && (
@@ -198,7 +215,7 @@ const MyDonationRequests = () => {
                               </div>
                             )}
                         </td>
-                        <td className="pr-4 md:pr-6 py-3 md:py-4">
+                        <td className="pr-4 md:pr-6">
                           <div className="flex justify-end gap-1 md:gap-2">
                             <motion.button
                               whileHover={{ scale: 1.1 }}
@@ -207,7 +224,7 @@ const MyDonationRequests = () => {
                                 setSelectedRequestId(request?._id);
                                 setIsDetailsModalOpen(true);
                               }}
-                              className="btn btn-ghost btn-xs text-gray-500 hover:text-primary"
+                              className="btn btn-ghost btn-xs text-gray-500 hover:text-primary tooltip tooltip-info" data-tip="Details"
                             >
                               <baseConfig.icons.eye className="w-3 h-3 md:w-4 md:h-4" />
                             </motion.button>
@@ -221,14 +238,11 @@ const MyDonationRequests = () => {
                                     setEditRequestData(request);
                                     setIsEditModalOpen(true);
                                   }}
-                                  className="btn btn-ghost btn-xs text-gray-500 hover:text-success"
+                                  className="btn btn-ghost btn-xs text-gray-500 hover:text-success tooltip tooltip-accent" data-tip="Edit"
                                 >
                                   <baseConfig.icons.edit className="w-3 h-3 md:w-4 md:h-4" />
                                 </motion.button>
-                                <motion.button
-                                  className="btn btn-ghost btn-xs text-gray-500 hover:text-error"
-                                  onClick={() => handleDeleteRequest(request?._id)}
-                                >
+                                <motion.button className="btn btn-ghost btn-xs text-gray-500 hover:text-error tooltip tooltip-warning" data-tip="Delete">
                                   <baseConfig.icons.trash className="w-3 h-3 md:w-4 md:h-4" />
                                 </motion.button>
                               </>
@@ -236,16 +250,10 @@ const MyDonationRequests = () => {
 
                             {request?.status?.current === "inprogress" && (
                               <>
-                                <motion.button
-                                  className="btn btn-ghost btn-xs text-success hover:text-success"
-                                  onClick={() => handleCompleteRequest(request?._id)}
-                                >
+                                <motion.button className="btn btn-ghost btn-xs text-success hover:text-success tooltip tooltip-success" data-tip="Complete">
                                   <baseConfig.icons.check className="w-3 h-3 md:w-4 md:h-4" />
                                 </motion.button>
-                                <motion.button
-                                  className="btn btn-ghost btn-xs text-error hover:text-error"
-                                  onClick={() => handleCancelRequest(request?._id)}
-                                >
+                                <motion.button className="btn btn-ghost btn-xs text-error hover:text-error tooltip tooltip-warning" data-tip="Cancel">
                                   <baseConfig.icons.times className="w-3 h-3 md:w-4 md:h-4" />
                                 </motion.button>
                               </>
@@ -277,7 +285,7 @@ const MyDonationRequests = () => {
           animate={{ opacity: 1 }}
           className="alert shadow-lg mt-6"
         >
-          <div>
+          <div className="flex items-center gap-1">
             <baseConfig.icons.info className="text-blue-500" />
             <span>No donation requests found matching your criteria.</span>
           </div>
@@ -296,7 +304,7 @@ const MyDonationRequests = () => {
                   closeModal={() => setIsDetailsModalOpen(false)}
                 />
               )}
-              <div className="modal-action absolute right-4 md:right-7 top-2 -translate-0.5">
+              <div className="modal-action absolute right-7 md:right-7 top-2 -translate-0.5">
                 <CloseBtn onClick={() => setIsDetailsModalOpen(false)} />
               </div>
             </div>

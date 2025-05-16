@@ -16,8 +16,8 @@ import AdminDashboard from "../pages/Dashboard/AdminDashboard/AdminDashboard";
 import VolunteerDashboard from "../pages/Dashboard/VolunteerDashboard/VolunteerDashboard";
 import Dashboard from "../pages/Dashboard/component/Dashboard";
 import DonorDashboard from "../pages/Dashboard/DonorDashboard/DonorDashboard";
-import MyDonationRequests from "../pages/Dashboard/DonorDashboard/MyDonationRequests/MyDonationRequests";
 import Profile from "../pages/Dashboard/component/Profile";
+import MyDonationRequests from "../pages/Dashboard/DonorDashboard/MyDonationRequests/MyDonationRequests";
 
 export const routes = createBrowserRouter([
   {
@@ -125,10 +125,6 @@ export const routes = createBrowserRouter([
           {
             path: "my-donation-requests",
             element: <MyDonationRequests />,
-          },
-          {
-            path: "create-donation-request",
-            element: <ContentManagement />,
           },
         ],
       },

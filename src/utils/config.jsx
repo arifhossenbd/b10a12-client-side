@@ -18,7 +18,8 @@ import {
   FaHospital,
   FaEye,
   FaEdit,
-  FaTrash
+  FaTrash,
+  FaInfo
 } from "react-icons/fa";
 
 // Base configuration
@@ -34,7 +35,8 @@ const baseConfig = {
     hospital: FaHospital,
     eye: FaEye,
     edit: FaEdit,
-    trash: FaTrash
+    trash: FaTrash,
+    info: FaInfo
   },
   formats: {
     time: "h:mm A",
@@ -102,7 +104,7 @@ const statusConfig = {
     borderColor: "border-blue-200",
     icon: baseConfig.icons.heartbeat,
     iconColor: "text-blue-500",
-    label: "In Progress",
+    label: "Inprogress",
     badgeClass: "badge-info",
   },
   completed: {
@@ -126,13 +128,13 @@ const statusConfig = {
     badgeClass: "badge-error",
   },
   default: {
-    color: "bg-gray-100 text-gray-800",
-    textColor: "text-gray-800",
-    bgColor: "bg-gray-100",
-    borderColor: "border-gray-200",
+    color: "bg-red-100 text-red-800",
+    textColor: "text-red-800",
+    bgColor: "bg-red-100",
+    borderColor: "border-red-200",
     icon: baseConfig.icons.clock,
-    iconColor: "text-gray-500",
-    label: "Unknown",
+    iconColor: "text-red-500",
+    label: "Current",
     badgeClass: "badge-neutral",
   }
 };

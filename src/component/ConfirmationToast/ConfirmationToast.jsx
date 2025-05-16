@@ -1,4 +1,3 @@
-// components/ConfirmationToast/ConfirmationToast.jsx
 import { motion } from "framer-motion";
 import { FaHeartbeat, FaEnvelope, FaTrash, FaCheck, FaTimes } from "react-icons/fa";
 import SecondaryBtn from "../../Buttons/SecondaryBtn";
