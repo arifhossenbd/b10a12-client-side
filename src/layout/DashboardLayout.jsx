@@ -34,20 +34,21 @@ const DashboardLayout = ({
 
   useEffect(() => {
     const handleResize = () => {
-      const mobile = window.matchMedia("(max-width: 767px)").matches;
+      const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      if (!mobile) {
-        setSidebarState((prev) => ({ ...prev, mobileOpen: false }));
+      // Auto-collapse sidebar on mobile when resizing to desktop
+      if (!mobile && sidebarState.mobileOpen) {
+        setSidebarState(prev => ({ ...prev, mobileOpen: false }));
       }
     };
 
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [sidebarState.mobileOpen]);
 
   const toggleSidebar = () => {
-    setSidebarState((prev) => {
+    setSidebarState(prev => {
       if (isMobile) {
         return { ...prev, mobileOpen: !prev.mobileOpen };
       } else {
@@ -70,10 +71,8 @@ const DashboardLayout = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 z-40"
-            onClick={() =>
-              setSidebarState((prev) => ({ ...prev, mobileOpen: false }))
-            }
+            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            onClick={() => setSidebarState(prev => ({ ...prev, mobileOpen: false }))}
           />
         )}
       </AnimatePresence>
@@ -81,7 +80,7 @@ const DashboardLayout = ({
       {/* Sidebar */}
       <motion.aside
         className={`fixed inset-y-0 left-0 bg-white shadow-lg z-50 md:z-40 ${
-          sidebarState.collapsed ? "w-20" : "w-64"
+          sidebarState.collapsed ? "w-16 md:w-20" : "w-64"
         }`}
         animate={{
           x: sidebarState.mobileOpen || !isMobile ? 0 : -300,
@@ -91,12 +90,12 @@ const DashboardLayout = ({
         <div className="h-full flex flex-col border-r border-gray-200">
           {loading ? (
             <div className="flex flex-col items-center justify-center h-screen">
-              <span className="loading loading-ring loading-xl"></span>
+              <span className="loading loading-ring loading-lg"></span>
             </div>
           ) : (
             <>
               {/* Sidebar Header */}
-              <div className="md:p-[17.5px] p-[19.5px] border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
+              <div className="p-3 md:p-4 border-b border-gray-200 flex items-center justify-between sticky top-0 bg-white z-10">
                 <motion.div
                   animate={{
                     opacity: sidebarState.collapsed ? 0 : 1,
@@ -111,7 +110,7 @@ const DashboardLayout = ({
                   >
                     <FaTint className="text-red-500 text-xl flex-shrink-0" />
                   </motion.div>
-                  <p className="font-bold md:text-xl">
+                  <p className="font-bold text-lg md:text-xl">
                     Blood<span className="text-red-600">Connect</span>
                   </p>
                 </motion.div>
@@ -147,13 +146,13 @@ const DashboardLayout = ({
               {/* Sidebar Content */}
               <div className="flex-1 overflow-y-auto">
                 {/* User Profile */}
-                <div className="p-4 border-b border-gray-200 relative">
+                <div className="p-3 border-b border-gray-200 relative">
                   <div
                     className={`flex items-center cursor-pointer ${
                       sidebarState.collapsed
                         ? "justify-center"
                         : "justify-between"
-                    } gap-3`}
+                    } gap-2`}
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
                   >
                     <motion.div
@@ -165,13 +164,13 @@ const DashboardLayout = ({
                         <img
                           src={userData?.image}
                           alt={userData?.name}
-                          className="w-10 h-10 rounded-full object-cover border-2 border-white shadow"
+                          className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-white shadow"
                         />
                       ) : (
-                        <FaUserCircle className="text-3xl text-gray-400" />
+                        <FaUserCircle className="text-2xl md:text-3xl text-gray-400" />
                       )}
                       <motion.span
-                        className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"
+                        className="absolute bottom-0 right-0 w-2 h-2 md:w-3 md:h-3 bg-green-500 rounded-full border-2 border-white"
                         animate={{ scale: [1, 1.2, 1] }}
                         transition={{ repeat: Infinity, duration: 2 }}
                       />
@@ -185,7 +184,7 @@ const DashboardLayout = ({
                           animate={{ opacity: 1, width: "auto" }}
                           exit={{ opacity: 0, width: 0 }}
                         >
-                          <p className="font-medium truncate">
+                          <p className="text-sm md:text-base font-medium truncate">
                             {userData?.name}
                           </p>
                           <p className="text-xs text-gray-500 truncate">
@@ -205,7 +204,7 @@ const DashboardLayout = ({
                             animate={{ rotate: isProfileOpen ? 180 : 0 }}
                             transition={{ type: "spring", stiffness: 300 }}
                           >
-                            <FaChevronDown className={`w-4 h-4`} />
+                            <FaChevronDown className="w-3 h-3 md:w-4 md:h-4" />
                           </motion.button>
                         </motion.div>
                       </>
@@ -243,7 +242,7 @@ const DashboardLayout = ({
                           <motion.button
                             whileHover={{ x: 5 }}
                             whileTap={{ x: 10 }}
-                            className="w-full flex items-center gap-2 p-2 text-sm hover:bg-gray-100 cursor-pointer"
+                            className="w-full flex items-center gap-2 p-2 text-xs md:text-sm hover:bg-gray-100 cursor-pointer"
                           >
                             <FaUser className="text-gray-600 flex-shrink-0" />
                             <span>Profile</span>
@@ -252,7 +251,7 @@ const DashboardLayout = ({
                         <motion.button
                           whileHover={{ x: 5 }}
                           whileTap={{ x: 10 }}
-                          className="w-full flex items-center gap-2 p-2 text-sm hover:bg-gray-100 cursor-pointer"
+                          className="w-full flex items-center gap-2 p-2 text-xs md:text-sm hover:bg-gray-100 cursor-pointer"
                           onClick={handleLogout}
                         >
                           <FaSignOutAlt className="text-gray-600 flex-shrink-0" />
@@ -264,8 +263,8 @@ const DashboardLayout = ({
                 </div>
 
                 {/* Navigation */}
-                <nav className="p-2 md:p-3 lg:p-4">
-                  <ul className="space-y-2">
+                <nav className="p-2 md:p-3">
+                  <ul className="space-y-1 md:space-y-2">
                     {navLinks?.map((link) => (
                       <motion.li
                         key={link.id}
@@ -279,7 +278,7 @@ const DashboardLayout = ({
                           to={link.path}
                           end={link.exact}
                           className={({ isActive }) =>
-                            `flex items-center p-3 rounded-md transition-all ${
+                            `flex items-center p-2 md:p-3 rounded-md transition-all ${
                               isActive
                                 ? "bg-red-100 text-red-600"
                                 : "hover:bg-gray-100 bg-gray-50 text-gray-700"
@@ -287,12 +286,12 @@ const DashboardLayout = ({
                           }
                         >
                           <link.icon
-                            className={`w-5 h-5 flex-shrink-0 ${
+                            className={`w-4 h-4 md:w-5 md:h-5 flex-shrink-0 ${
                               sidebarState.collapsed ? "mx-auto" : ""
                             }`}
                           />
                           {!sidebarState.collapsed && (
-                            <span className="text-sm font-medium ml-3 whitespace-nowrap">
+                            <span className="text-xs md:text-sm font-medium ml-2 md:ml-3 whitespace-nowrap">
                               {link.name}
                             </span>
                           )}
@@ -310,7 +309,7 @@ const DashboardLayout = ({
                         <motion.li
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          className="flex items-center p-3 rounded-md transition-all hover:bg-gray-100 bg-gray-50 text-gray-700 cursor-pointer"
+                          className="flex items-center p-2 md:p-3 rounded-md transition-all hover:bg-gray-100 bg-gray-50 text-gray-700 cursor-pointer"
                         >
                           <button
                             onClick={() =>
@@ -319,12 +318,12 @@ const DashboardLayout = ({
                             className="flex items-center w-full"
                           >
                             <FaHandsHelping
-                              className={`w-5 h-5 flex-shrink-0 ${
+                              className={`w-4 h-4 md:w-5 md:h-5 flex-shrink-0 ${
                                 sidebarState.collapsed ? "mx-auto" : ""
                               }`}
                             />
                             {!sidebarState.collapsed && (
-                              <span className="text-sm font-medium ml-3 whitespace-nowrap">
+                              <span className="text-xs md:text-sm font-medium ml-2 md:ml-3 whitespace-nowrap">
                                 Create Donation Requests
                               </span>
                             )}
@@ -339,16 +338,16 @@ const DashboardLayout = ({
                         <motion.li
                           whileHover={{ scale: 1.02 }}
                           whileTap={{ scale: 0.98 }}
-                          className="flex items-center p-3 rounded-md transition-all hover:bg-gray-100 bg-gray-50 text-gray-700 cursor-pointer"
+                          className="flex items-center p-2 md:p-3 rounded-md transition-all hover:bg-gray-100 bg-gray-50 text-gray-700 cursor-pointer"
                         >
                           <Link to="/" className="flex items-center w-full">
                             <FaHome
-                              className={`w-5 h-5 flex-shrink-0 ${
+                              className={`w-4 h-4 md:w-5 md:h-5 flex-shrink-0 ${
                                 sidebarState.collapsed ? "mx-auto" : ""
                               }`}
                             />
                             {!sidebarState.collapsed && (
-                              <span className="text-sm font-medium ml-3 whitespace-nowrap">
+                              <span className="text-xs md:text-sm font-medium ml-2 md:ml-3 whitespace-nowrap">
                                 Home
                               </span>
                             )}
@@ -373,16 +372,16 @@ const DashboardLayout = ({
       {/* Main Content Area */}
       <div
         className={`flex-1 flex flex-col min-h-screen ${
-          sidebarState.collapsed ? "lg:ml-20" : "lg:ml-64"
+          sidebarState.collapsed ? "lg:ml-16 md:ml-20" : "lg:ml-64"
         } transition-all duration-300`}
       >
         {/* Fixed Header */}
         <header
-          className={`bg-white border-b border-gray-200 fixed top-0 z-30 h-16 ${
-            sidebarState.collapsed ? "lg:left-20" : "lg:left-64"
+          className={`bg-white border-b border-gray-200 fixed top-0 z-30 h-14 md:h-16 ${
+            sidebarState.collapsed ? "lg:left-16 md:left-20" : "lg:left-64"
           } right-0 left-0 transition-all duration-300`}
         >
-          <div className="flex items-center justify-between p-4 md:px-6 h-full">
+          <div className="flex items-center justify-between p-3 md:p-4 h-full">
             <motion.button
               whileHover={{ rotate: 90, scale: 1.1 }}
               whileTap={{ rotate: 180, scale: 0.9 }}
@@ -391,16 +390,16 @@ const DashboardLayout = ({
               onClick={toggleSidebar}
               aria-label="Toggle sidebar"
             >
-              <FaBars />
+              <FaBars className="text-lg" />
             </motion.button>
-            <h1 className="text-lg font-semibold">{headerTitle}</h1>
+            <h1 className="text-base md:text-lg font-semibold">{headerTitle}</h1>
             <motion.button
               whileHover={{ rotate: 15, scale: 1.1 }}
               whileTap={{ rotate: -15, scale: 0.9 }}
               className="relative text-gray-500 hover:text-red-500 transition-colors cursor-pointer tooltip"
               data-tip="Notifications"
             >
-              <FaBell className="text-xl" />
+              <FaBell className="text-lg md:text-xl" />
               <motion.span
                 className="absolute -top-1 right-0 w-2 h-2 bg-red-500 rounded-full"
                 animate={{ scale: [1, 1.3, 1] }}
@@ -411,12 +410,12 @@ const DashboardLayout = ({
         </header>
 
         {/* Scrollable Content */}
-        <div className="flex-1 pt-16 overflow-y-auto">
+        <div className="flex-1 pt-14 md:pt-16 overflow-y-auto">
           <motion.main
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
-            className="bg-gray-50"
+            className="bg-gray-50 min-h-[calc(100vh-3.5rem)] md:min-h-[calc(100vh-4rem)] p-3 md:p-4"
           >
             <Outlet />
             <Search />

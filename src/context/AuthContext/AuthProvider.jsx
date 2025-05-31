@@ -8,17 +8,23 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { auth } from "../../firebase/firebase.config";
+import useAxiosPublic from "../../hooks/useAxiosPublic";
 
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { axiosPublic } = useAxiosPublic();
 
   const register = async (email, password, name, image) => {
     setLoading(true);
     try {
       // Create user in Firebase
-      const response = await createUserWithEmailAndPassword(auth, email, password);
-      
+      const response = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
       if (!response?.user) {
         throw new Error("User creation failed");
       }
@@ -44,7 +50,11 @@ const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     setLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
       setUser(userCredential.user);
       return userCredential.user;
     } catch (error) {
@@ -67,8 +77,22 @@ const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser || null);
+      if (currentUser) {
+        const user = { email: currentUser?.email };
+        try {
+          await axiosPublic.post("/jwt", user);
+        } catch (error) {
+          console.error("JWT Error:", error);
+        }
+      } else {
+        try {
+          await axiosPublic.post("/logout");
+        } catch (error) {
+          console.error("Logout Error:", error);
+        }
+      }
       setLoading(false);
     });
     return () => unsubscribe();
