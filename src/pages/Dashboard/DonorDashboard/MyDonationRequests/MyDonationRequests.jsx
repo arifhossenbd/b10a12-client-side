@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "../../../../hooks/useAuth";
 import useDatabaseData from "../../../../hooks/useDatabaseData";
 import {
   formatDate,
@@ -17,9 +16,9 @@ import Pagination from "../../../../component/Pagination/Pagination";
 import useCustomToast from "../../../../hooks/useCustomToast";
 import useAxiosPublic from "../../../../hooks/useAxiosPublic";
 import toast from "react-hot-toast";
+import useUserRole from "../../../../hooks/useUserRole";
 
 const MyDonationRequests = () => {
-  const { user } = useAuth();
   const [selectedRequestId, setSelectedRequestId] = useState(null);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [editRequestData, setEditRequestData] = useState(null);
@@ -27,6 +26,7 @@ const MyDonationRequests = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const { showConfirmationToast } = useCustomToast();
   const { axiosPublic } = useAxiosPublic();
+  const { role, loading, user } = useUserRole();
   const itemsPerPage = 5;
 
   const {
@@ -34,10 +34,17 @@ const MyDonationRequests = () => {
     isLoading,
     refetch,
   } = useDatabaseData(
-    `/donations/my-requests?email=${user?.email}&page=${currentPage}&limit=${itemsPerPage}`
+    user?.email && role
+      ? `/blood-requests?email=${user.email}&role=${role}&page=${currentPage}&limit=${itemsPerPage}`
+      : null
   );
 
-  const myRequests = responseData?.data || [];
+  // Filter to show only requests where user is involved (as donor or requester)
+  const myRequests = (responseData?.data || []).filter(
+    (request) =>
+      request?.requester?.email === user?.email ||
+      request?.donor?.email === user?.email
+  );
   const meta = responseData?.meta || {};
 
   const tableVariants = {
@@ -56,7 +63,7 @@ const MyDonationRequests = () => {
     visible: { opacity: 1, y: 0 },
   };
 
-  if (isLoading) {
+  if (isLoading || loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <span className="loading loading-spinner loading-xl"></span>
@@ -64,6 +71,43 @@ const MyDonationRequests = () => {
     );
   }
 
+  // Handle status update (complete/cancel)
+  const handleStatusUpdate = async (requestId, action) => {
+    try {
+      const confirmed = await showConfirmationToast({
+        title: `${action === "complete" ? "Complete" : "Cancel"} Request`,
+        description: `Are you sure you want to ${action} this donation request?`,
+        confirmText: action === "complete" ? "Complete" : "Cancel",
+        cancelText: "Go Back",
+        icon: action === "complete" ? "check" : "times",
+      });
+
+      if (!confirmed) return;
+
+      const response = await axiosPublic.patch(`/blood-requests/${requestId}`, {
+        action,
+        email: user?.email,
+        name: user?.displayName,
+        role: "requester",
+      });
+
+      if (response.data.success) {
+        toast.success(
+          `Request ${
+            action === "complete" ? "completed" : "cancelled"
+          } successfully`
+        );
+        await refetch?.();
+      }
+    } catch (error) {
+      console.error(`${action} request error:`, error);
+      toast.error(
+        error.response?.data?.message || `Failed to ${action} request`
+      );
+    }
+  };
+
+  // Handle delete request
   const handleDeleteRequest = async (requestId) => {
     try {
       const confirmed = await showConfirmationToast({
@@ -77,7 +121,7 @@ const MyDonationRequests = () => {
       if (!confirmed) return;
 
       const response = await axiosPublic.delete(
-        `/donations/my-requests/${requestId}/?email=${user?.email}`
+        `/blood-requests/${requestId}/?email=${user?.email}`
       );
 
       if (response.data.success) {
@@ -224,7 +268,8 @@ const MyDonationRequests = () => {
                                 setSelectedRequestId(request?._id);
                                 setIsDetailsModalOpen(true);
                               }}
-                              className="btn btn-ghost btn-xs text-gray-500 hover:text-primary tooltip tooltip-info" data-tip="Details"
+                              className="btn btn-ghost btn-xs text-gray-500 hover:text-primary tooltip tooltip-info"
+                              data-tip="Details"
                             >
                               <baseConfig.icons.eye className="w-3 h-3 md:w-4 md:h-4" />
                             </motion.button>
@@ -238,22 +283,61 @@ const MyDonationRequests = () => {
                                     setEditRequestData(request);
                                     setIsEditModalOpen(true);
                                   }}
-                                  className="btn btn-ghost btn-xs text-gray-500 hover:text-success tooltip tooltip-accent" data-tip="Edit"
+                                  className="btn btn-ghost btn-xs text-gray-500 hover:text-success tooltip tooltip-accent"
+                                  data-tip="Edit"
                                 >
                                   <baseConfig.icons.edit className="w-3 h-3 md:w-4 md:h-4" />
                                 </motion.button>
-                                <motion.button className="btn btn-ghost btn-xs text-gray-500 hover:text-error tooltip tooltip-warning" data-tip="Delete">
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() =>
+                                    handleDeleteRequest(request?._id)
+                                  }
+                                  className="btn btn-ghost btn-xs text-gray-500 hover:text-error tooltip tooltip-warning"
+                                  data-tip="Delete"
+                                >
                                   <baseConfig.icons.trash className="w-3 h-3 md:w-4 md:h-4" />
                                 </motion.button>
                               </>
                             )}
-
+                            {request?.status?.current === "cancelled" && (
+                              <>
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() =>
+                                    handleDeleteRequest(request?._id)
+                                  }
+                                  className="btn btn-ghost btn-xs text-gray-500 hover:text-error tooltip tooltip-warning"
+                                  data-tip="Delete"
+                                >
+                                  <baseConfig.icons.trash className="w-3 h-3 md:w-4 md:h-4" />
+                                </motion.button>
+                              </>
+                            )}
                             {request?.status?.current === "inprogress" && (
                               <>
-                                <motion.button className="btn btn-ghost btn-xs text-success hover:text-success tooltip tooltip-success" data-tip="Complete">
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() =>
+                                    handleStatusUpdate(request?._id, "complete")
+                                  }
+                                  className="btn btn-ghost btn-xs text-success hover:text-success tooltip tooltip-success"
+                                  data-tip="Complete"
+                                >
                                   <baseConfig.icons.check className="w-3 h-3 md:w-4 md:h-4" />
                                 </motion.button>
-                                <motion.button className="btn btn-ghost btn-xs text-error hover:text-error tooltip tooltip-warning" data-tip="Cancel">
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.95 }}
+                                  onClick={() =>
+                                    handleStatusUpdate(request?._id, "cancel")
+                                  }
+                                  className="btn btn-ghost btn-xs text-error hover:text-error tooltip tooltip-warning"
+                                  data-tip="Cancel"
+                                >
                                   <baseConfig.icons.times className="w-3 h-3 md:w-4 md:h-4" />
                                 </motion.button>
                               </>

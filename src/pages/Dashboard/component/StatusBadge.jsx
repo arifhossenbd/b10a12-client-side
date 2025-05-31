@@ -1,23 +1,22 @@
-import { getStatusConfig } from "../../../utils/config";
+const StatusBadge = ({ status, style }) => {
+  const config = {
+    pending: { color: "badge-warning", text: "Pending" },
+    inprogress: { color: "badge-info", text: "Inprogress" },
+    completed: { color: "badge-success", text: "Completed" },
+    cancelled: { color: "badge-error", text: "Cancelled" },
+    blocked: { color: "badge-error", text: "Blocked" },
+    default: { color: "badge-neutral", text: "Current" },
+  };
 
-const StatusBadge = ({ status }) => {
-  try {
-    const statusInfo = getStatusConfig(status);
-    return (
-      <span
-        className={`px-2 py-1 text-xs font-medium rounded-full text-wrap ${statusInfo.color}`}
-      >
-        {statusInfo.label}
-      </span>
-    );
-  } catch (error) {
-    console.error("Error in StatusBadge:", error);
-    return (
-      <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-        Current
-      </span>
-    );
-  }
+  const { color, text } = config[status] || config[status] || config.default;
+
+  return (
+    <span
+      className={`badge text-xs md:text-sm font-semibold rounded-full text-white ${color} ${style}`}
+    >
+      {text}
+    </span>
+  );
 };
 
 export default StatusBadge;

@@ -183,7 +183,7 @@ const Profile = () => {
                       variants={buttonVariants}
                       whileHover="hover"
                       whileTap="tap"
-                      className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors cursor-pointer"
                     >
                       <FaEdit /> Edit Profile
                     </motion.button>
@@ -201,7 +201,7 @@ const Profile = () => {
                         variants={buttonVariants}
                         whileHover="hover"
                         whileTap="tap"
-                        className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors cursor-pointer"
                       >
                         <FaTimes /> Cancel
                       </motion.button>
@@ -212,7 +212,7 @@ const Profile = () => {
                         variants={buttonVariants}
                         whileHover="hover"
                         whileTap="tap"
-                        className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-70"
+                        className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors disabled:opacity-70 cursor-pointer"
                       >
                         {isSubmitting || isImageUploading ? (
                           <motion.span
@@ -227,7 +227,7 @@ const Profile = () => {
                           </motion.span>
                         ) : (
                           <FaSave />
-                        )}{" "}
+                        )}
                         Save Changes
                       </motion.button>
                     </div>
@@ -262,7 +262,7 @@ const Profile = () => {
 
                     {editMode && (
                       <motion.div
-                        className="absolute inset-0 rounded-full bg-black bg-opacity-30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute inset-0 rounded-full bg-black/50 bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                         whileHover={{ opacity: 1 }}
                       >
                         <label className="cursor-pointer p-3 bg-white bg-opacity-80 rounded-full">

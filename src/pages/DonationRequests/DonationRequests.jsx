@@ -16,21 +16,36 @@ import {
 import RequestCardSkeleton from "../../component/Skeleton/RequestCardSkeleton";
 import CloseBtn from "../../Buttons/CloseBtn";
 import useDatabaseData from "../../hooks/useDatabaseData";
+import { useAuth } from "../../hooks/useAuth";
+import Pagination from "../../component/Pagination/Pagination";
+import useUserRole from "../../hooks/useUserRole";
 
 const DonationRequests = () => {
   const navigate = useNavigate();
   const [selectedRequestId, setSelectedRequestId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user } = useAuth();
+  const { role } = useUserRole();
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const { data, isLoading, isRefetching, refetch, isError, error } =
-    useDatabaseData("/blood-requests", {
-      page: 1,
-      limit: 100,
-    });
+  const itemsPerPage = 9;
 
-  const bloodRequests = data?.data || [];
+  const {
+    data: responseData,
+    isLoading,
+    refetch,
+    error,
+    isError,
+    isRefetching,
+  } = useDatabaseData(
+    `/blood-requests?email=${user?.email}&role=${role}&page=${currentPage}&limit=${itemsPerPage}`
+  );
+
+  const bloodRequests = responseData?.data || [];
+  const meta = responseData?.meta || {};
+
   const isNetworkError = error?.code === "ERR_NETWORK";
-  const isEmptyResponse = bloodRequests.length === 0 && !isLoading && !isError;
+  const isEmptyResponse = bloodRequests?.length === 0 && !isLoading && !isError;
 
   const handleRefresh = async () => {
     try {
@@ -129,8 +144,8 @@ const DonationRequests = () => {
             </h1>
 
             <p className="text-lg text-gray-600 mb-6">
-              {bloodRequests.length > 0
-                ? `${bloodRequests.length} urgent requests need your help`
+              {bloodRequests?.length > 0
+                ? `${bloodRequests?.length} urgent requests need your help`
                 : "No active requests currently"}
             </p>
 
@@ -140,48 +155,85 @@ const DonationRequests = () => {
                 Life-Saving Requests
               </span>
 
-              {bloodRequests.length > 0 && (
+              {bloodRequests?.length > 0 && (
                 <span className="badge badge-lg bg-blue-100 text-blue-600 border-blue-200">
                   <FaClock className="mr-2" />
-                  {bloodRequests.length} Active
+                  {bloodRequests?.length} Active
                 </span>
               )}
             </div>
 
-            <div className="flex justify-center gap-4 mb-8">
-              <SecondaryBtn
-                onClick={handleRefresh}
-                disabled={isRefetching}
-                className="flex items-center gap-2"
-              >
-                {isRefetching ? (
-                  <>
-                    <motion.span
-                      animate={{ rotate: 360 }}
-                      transition={{ repeat: Infinity, duration: 1 }}
-                    >
-                      <FaSync className="text-sm" />
-                    </motion.span>
-                    Refreshing...
-                  </>
-                ) : (
-                  <>
-                    <FaSync className="text-sm" />
-                    Refresh
-                  </>
-                )}
-              </SecondaryBtn>
+            {bloodRequests?.length > 0 && (
+              <div className="flex justify-center gap-4 mb-8">
+                <motion.div
+                  initial={{ opacity: 0, x: -50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5 }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center justify-center gap-2"
+                >
+                  <SecondaryBtn
+                    onClick={handleRefresh}
+                    disabled={isRefetching}
+                    className="flex items-center gap-2"
+                  >
+                    {isRefetching ? (
+                      <>
+                        <motion.span
+                          animate={{ rotate: 360 }}
+                          transition={{ repeat: Infinity, duration: 1 }}
+                        >
+                          <FaSync className="text-sm" />
+                        </motion.span>
+                        Refreshing...
+                      </>
+                    ) : (
+                      <>
+                        <FaSync className="text-sm" />
+                        Refresh
+                      </>
+                    )}
+                  </SecondaryBtn>
+                </motion.div>
 
-              <PrimaryBtn
-                onClick={() =>
-                  document.getElementById("searchModal").showModal()
-                }
-                className="flex items-center gap-2"
-              >
-                <FaSearch className="text-sm" />
-                Search Donors
-              </PrimaryBtn>
-            </div>
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5 }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center justify-center gap-2"
+                >
+                  <SecondaryBtn
+                    onClick={() =>
+                      document.getElementById("searchModal").showModal()
+                    }
+                  >
+                    <motion.span
+                      animate={{
+                        x: [0, 3, -2, 0],
+                        y: [0, 2, -1, 0],
+                        rotate: [0, 5, -5, 0],
+                        transition: {
+                          repeat: Infinity,
+                          repeatType: "reverse",
+                          duration: 3,
+                          ease: "easeInOut",
+                        },
+                      }}
+                      whileHover={{
+                        scale: 1.1,
+                        transition: { duration: 0.2 },
+                      }}
+                    >
+                      <FaSearch />
+                    </motion.span>
+                    Search Donors
+                  </SecondaryBtn>
+                </motion.div>
+              </div>
+            )}
           </motion.div>
 
           {isEmptyResponse ? (
@@ -201,13 +253,41 @@ const DonationRequests = () => {
               </div>
               <div className="flex gap-4">
                 <SecondaryBtn onClick={handleRefresh}>Refresh</SecondaryBtn>
-                <PrimaryBtn
-                  onClick={() =>
-                    document.getElementById("searchModal").showModal()
-                  }
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5 }}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center justify-center gap-2"
                 >
-                  Search Donors
-                </PrimaryBtn>
+                  <SecondaryBtn
+                    onClick={() =>
+                      document.getElementById("searchModal").showModal()
+                    }
+                  >
+                    <motion.span
+                      animate={{
+                        x: [0, 3, -2, 0],
+                        y: [0, 2, -1, 0],
+                        rotate: [0, 5, -5, 0],
+                        transition: {
+                          repeat: Infinity,
+                          repeatType: "reverse",
+                          duration: 3,
+                          ease: "easeInOut",
+                        },
+                      }}
+                      whileHover={{
+                        scale: 1.1,
+                        transition: { duration: 0.2 },
+                      }}
+                    >
+                      <FaSearch />
+                    </motion.span>
+                    Search Donors
+                  </SecondaryBtn>
+                </motion.div>
               </div>
             </motion.div>
           ) : (
@@ -242,6 +322,17 @@ const DonationRequests = () => {
                     </motion.div>
                   ))}
                 </motion.div>
+
+                {/* Pagination */}
+                {meta?.totalPages > 1 && (
+                  <div className="mt-6 flex justify-center">
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={meta?.totalPages}
+                      onPageChange={setCurrentPage}
+                    />
+                  </div>
+                )}
               </AnimatePresence>
             </>
           )}

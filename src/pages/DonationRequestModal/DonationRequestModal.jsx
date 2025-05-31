@@ -22,9 +22,10 @@ import {
   FaCity,
   FaMapMarkedAlt,
 } from "react-icons/fa";
+import useUserRole from "../../hooks/useUserRole";
 
 const DonationRequestModal = ({
-  donor,
+  donor = null,
   refetch,
   isEditMode = false,
   requestData = null,
@@ -33,11 +34,12 @@ const DonationRequestModal = ({
   const { user } = useAuth();
   const navigate = useNavigate();
   const { axiosPublic } = useAxiosPublic();
+  const { role } = useUserRole();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // User data with fallbacks
   const { uid, displayName, email } = user || {};
-  
+
   // Donor data with fallbacks
   const donorData = donor || {};
   const {
@@ -46,6 +48,7 @@ const DonationRequestModal = ({
     email: donorEmail = "",
     bloodGroup = "Unknown",
     location: donorLocation = {},
+    role: donorRole = "donor",
   } = donorData;
 
   const bloodGroupConfig = getBloodGroupConfig(bloodGroup);
@@ -65,9 +68,10 @@ const DonationRequestModal = ({
     validate: (values) => {
       const errors = validateDonationTime(values);
       if (errors?.donationDate || errors?.donationTime) {
-        const message = errors?.donationDate && errors?.donationTime 
-          ? "Please select a valid future date and time"
-          : errors?.donationDate 
+        const message =
+          errors?.donationDate && errors?.donationTime
+            ? "Please select a valid future date and time"
+            : errors?.donationDate
             ? errors.donationDate
             : errors.donationTime;
         toast.error(message, { id: "date-time-error" });
@@ -86,30 +90,75 @@ const DonationRequestModal = ({
             hospital: values.hospitalName,
           },
           donationInfo: {
-            bloodGroup: isEditMode ? requestData?.donationInfo?.bloodGroup : bloodGroup,
+            bloodGroup: isEditMode
+              ? requestData?.donationInfo?.bloodGroup
+              : bloodGroup,
             requiredDate: values.donationDate,
             requiredTime: values.donationTime,
             urgency: "normal",
             additionalInfo: values.requestMessage || "",
           },
           location: {
-            division: isEditMode ? requestData?.location?.division : donorLocation?.division || "",
-            district: isEditMode ? requestData?.location?.district : donorLocation?.district || "",
-            upazila: isEditMode ? requestData?.location?.upazila : donorLocation?.upazila || "",
+            division: isEditMode
+              ? requestData?.location?.division
+              : donorLocation?.division || "",
+            district: isEditMode
+              ? requestData?.location?.district
+              : donorLocation?.district || "",
+            upazila: isEditMode
+              ? requestData?.location?.upazila
+              : donorLocation?.upazila || "",
             fullAddress: values.fullAddress,
           },
           requester: {
             id: uid,
-            name: displayName || "Anonymous",
+            name: displayName || "Unknown",
             email: email || "",
-          }
+            role: role || "requester",
+          },
+          donor: isEditMode
+            ? requestData?.donor || {
+                id: _id,
+                name: donorName,
+                email: donorEmail,
+                role: donorRole || "donor",
+              }
+            : {
+                id: _id,
+                name: donorName,
+                email: donorEmail,
+                role: donorRole || "donor",
+              },
+          role: role || "requester",
+          createdAt: nowTime,
+          updatedAt: nowTime,
         };
 
         if (isEditMode) {
           // Update existing request
           const response = await axiosPublic.patch(
-            `/donations/my-requests/${requestData._id}`,
-            payload
+            `/blood-requests/${requestData._id}`,
+            {
+              ...payload,
+              action: "update",
+              role: role || "requester",
+              email: email,
+              updatedAt: nowTime,
+              status: {
+                current: "pending",
+                history: [
+                  ...(requestData?.status?.history || []),
+                  {
+                    changedAt: nowTime,
+                    changedBy: {
+                      name: displayName || "Unknown",
+                      email: email || "",
+                      role: role || "requester",
+                    },
+                  },
+                ],
+              }
+            }
           );
           if (response.data?.success) {
             toast.success("Request updated successfully!");
@@ -126,20 +175,16 @@ const DonationRequestModal = ({
             },
             status: {
               current: "pending",
-              history: [{
-                status: "pending",
-                changedAt: nowTime,
-                changedBy: {
-                  id: uid,
-                  name: displayName || "System",
-                  email: email || "",
+              history: [
+                {
+                  changedAt: nowTime,
+                  changedBy: {
+                    name: displayName || "Unknown",
+                    email: email || "",
+                    role: "requester",
+                  },
                 },
-              }],
-            },
-            metadata: {
-              donorId: _id,
-              donorName,
-              donorEmail,
+              ],
             },
           });
           if (response.status === 201) {
@@ -164,8 +209,12 @@ const DonationRequestModal = ({
         recipientName: requestData.recipient?.name || "",
         hospitalName: requestData.recipient?.hospital || "",
         fullAddress: requestData.location?.fullAddress || "",
-        donationDate: requestData.donationInfo?.requiredDate || dayjs().format("YYYY-MM-DD"),
-        donationTime: requestData.donationInfo?.requiredTime || dayjs().add(1, "hour").format("HH:mm"),
+        donationDate:
+          requestData.donationInfo?.requiredDate ||
+          dayjs().format("YYYY-MM-DD"),
+        donationTime:
+          requestData.donationInfo?.requiredTime ||
+          dayjs().add(1, "hour").format("HH:mm"),
         requestMessage: requestData.donationInfo?.additionalInfo || "",
       });
     }
@@ -199,20 +248,29 @@ const DonationRequestModal = ({
         >
           <CloseBtn onClick={onClose} disabled={isSubmitting} />
 
-          <div className={`flex flex-col items-center justify-center mb-4 md:mb-6 gap-2 ${bloodGroupConfig.color}`}>
+          <div
+            className={`flex flex-col items-center justify-center mb-4 md:mb-6 gap-2 ${bloodGroupConfig.color}`}
+          >
             <p className="text-5xl">
               <bloodGroupConfig.Icon size={60} />
             </p>
             <h3 className="text-xl md:text-2xl font-bold text-center">
               {isEditMode ? "Edit Donation Request" : "Blood Donation Request"}
             </h3>
-            <div className={`badge ${bloodGroupConfig.badgeClass} ${bloodGroupConfig.color} gap-2 font-bold`}>
+            <div
+              className={`badge ${bloodGroupConfig.badgeClass} ${bloodGroupConfig.color} gap-2 font-bold`}
+            >
               <bloodGroupConfig.Icon size={12} />
-              {isEditMode ? requestData?.donationInfo?.bloodGroup : bloodGroup || "Unknown"}
+              {isEditMode
+                ? requestData?.donationInfo?.bloodGroup
+                : bloodGroup || "Unknown"}
             </div>
           </div>
 
-          <form onSubmit={formik.handleSubmit} className="space-y-3 md:space-y-4">
+          <form
+            onSubmit={formik.handleSubmit}
+            className="space-y-3 md:space-y-4"
+          >
             {/* Requester Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               <div className="form-control">
@@ -222,7 +280,7 @@ const DonationRequestModal = ({
                 <div className="relative">
                   <input
                     type="text"
-                    value={displayName || "Anonymous"}
+                    value={displayName || "Unknown"}
                     readOnly
                     className="input input-bordered w-full pl-9 focus:outline-none"
                     style={{
@@ -296,7 +354,9 @@ const DonationRequestModal = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               <div className="form-control">
                 <label className="label py-1">
-                  <span className="label-text font-medium">Donation Date *</span>
+                  <span className="label-text font-medium">
+                    Donation Date *
+                  </span>
                 </label>
                 <div className="relative">
                   <input
@@ -313,7 +373,9 @@ const DonationRequestModal = ({
               </div>
               <div className="form-control">
                 <label className="label py-1">
-                  <span className="label-text font-medium">Donation Time *</span>
+                  <span className="label-text font-medium">
+                    Donation Time *
+                  </span>
                 </label>
                 <div className="relative">
                   <input
@@ -321,9 +383,12 @@ const DonationRequestModal = ({
                     name="donationTime"
                     onChange={formik.handleChange}
                     value={formik.values.donationTime}
-                    min={formik.values.donationDate === dayjs().format("YYYY-MM-DD") 
-                      ? dayjs().add(1, "minute").format("HH:mm") 
-                      : "00:00"}
+                    min={
+                      formik.values.donationDate ===
+                      dayjs().format("YYYY-MM-DD")
+                        ? dayjs().add(1, "minute").format("HH:mm")
+                        : "00:00"
+                    }
                     className="input input-bordered w-full pl-9 focus:outline-none"
                     required
                   />
@@ -444,9 +509,23 @@ const DonationRequestModal = ({
               >
                 {isSubmitting ? (
                   <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
                     </svg>
                     Processing...
                   </span>

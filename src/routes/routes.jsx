@@ -42,7 +42,7 @@ export const routes = createBrowserRouter([
         element: <DonationRequests />,
       },
       {
-        path: "/search-results",
+        path: "/search",
         element: <SearchResults />,
       },
       {

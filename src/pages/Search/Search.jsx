@@ -47,7 +47,7 @@ const Search = () => {
     onSubmit: (values) => {
       document.getElementById("searchModal").close();
       navigate(
-        `/search-results?bloodGroup=${values.bloodGroup}&division=${values.division}&district=${values.district}&upazila=${values.upazila}`
+        `/search?bloodGroup=${values.bloodGroup}&division=${values.division}&district=${values.district}&upazila=${values.upazila}`
       );
     },
   });

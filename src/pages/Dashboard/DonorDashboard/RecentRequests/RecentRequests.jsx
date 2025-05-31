@@ -15,6 +15,9 @@ import CloseBtn from "../../../../Buttons/CloseBtn";
 import DonationRequestModal from "../../../DonationRequestModal/DonationRequestModal";
 import StatusBadge from "../../component/StatusBadge";
 import Loading from "../../../../component/Loading/Loading";
+import toast from "react-hot-toast";
+import useCustomToast from "../../../../hooks/useCustomToast";
+import useAxiosPublic from "../../../../hooks/useAxiosPublic";
 
 const RecentRequests = () => {
   const { user } = useAuth();
@@ -22,13 +25,15 @@ const RecentRequests = () => {
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [editRequestData, setEditRequestData] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const { showConfirmationToast } = useCustomToast();
+  const { axiosPublic } = useAxiosPublic();
 
   const {
     data: responseData,
     isLoading,
     error,
     refetch,
-  } = useDatabaseData(`/donations/recent?requesterEmail=${user?.email}`);
+  } = useDatabaseData(`/recent/blood/request?requesterEmail=${user?.email}`);
 
   const recentRequests = responseData?.data || [];
 
@@ -68,6 +73,95 @@ const RecentRequests = () => {
     );
   }
 
+  const handleDeleteRequest = async (requestId) => {
+    try {
+      const confirmed = await showConfirmationToast({
+        title: "Delete Request",
+        description: "Are you sure you want to delete this donation request?",
+        confirmText: "Delete",
+        cancelText: "Cancel",
+        icon: "trash",
+      });
+
+      if (!confirmed) return;
+
+      const response = await axiosPublic.delete(
+        `/blood-requests/${requestId}/?email=${user?.email}`
+      );
+
+      if (response.data.success) {
+        toast.success("Donation request deleted successfully");
+        await refetch();
+      }
+    } catch (error) {
+      console.error("Delete request error:", error);
+      toast.error(error.response?.data?.message || "Failed to delete request");
+    }
+  };
+
+  const handleCompleteRequest = async (requestId) => {
+    try {
+      const confirmed = await showConfirmationToast({
+        title: "Complete Request",
+        description:
+          "Are you sure you want to mark this donation as completed?",
+        confirmText: "Complete",
+        cancelText: "Cancel",
+        icon: "check",
+      });
+
+      if (!confirmed) return;
+
+      const response = await axiosPublic.patch(
+        `/blood-requests/update-status/${requestId}`,
+        {
+          action: "complete",
+          email: user?.email,
+        }
+      );
+
+      if (response.data.success) {
+        toast.success("Donation request marked as completed");
+        await refetch();
+      }
+    } catch (error) {
+      console.error("Complete request error:", error);
+      toast.error(
+        error.response?.data?.message || "Failed to complete request"
+      );
+    }
+  };
+
+  const handleCancelRequest = async (requestId) => {
+    try {
+      const confirmed = await showConfirmationToast({
+        title: "Cancel Request",
+        description: "Are you sure you want to cancel this donation request?",
+        confirmText: "Cancel Request",
+        cancelText: "Go Back",
+        icon: "times",
+      });
+
+      if (!confirmed) return;
+
+      const response = await axiosPublic.patch(
+        `/blood-requests/update-status/${requestId}`,
+        {
+          action: "cancel",
+          email: user?.email,
+        }
+      );
+
+      if (response.data.success) {
+        toast.success("Donation request cancelled successfully");
+        await refetch();
+      }
+    } catch (error) {
+      console.error("Cancel request error:", error);
+      toast.error(error.response?.data?.message || "Failed to cancel request");
+    }
+  };
+
   return (
     <motion.section
       initial={{ opacity: 0 }}
@@ -87,12 +181,14 @@ const RecentRequests = () => {
             Recent Donation Requests
           </motion.h1>
 
-          <Link
-            to="/dashboard/donor/my-donation-requests"
-            className="btn btn-sm btn-ghost text-primary flex items-center justify-center gap-1 bg-stone-100 hover:bg-stone-200 w-fit"
-          >
-            View All Requests
-          </Link>
+          {recentRequests?.length > 0 && (
+            <Link
+              to="/dashboard/donor/my-donation-requests"
+              className="btn btn-sm btn-ghost text-primary flex items-center justify-center gap-1 bg-stone-100 hover:bg-stone-200 w-fit"
+            >
+              View All Requests
+            </Link>
+          )}
         </div>
       </header>
 
@@ -239,6 +335,11 @@ const RecentRequests = () => {
                                 <baseConfig.icons.edit className="w-3 h-3 md:w-4 md:h-4" />
                               </motion.button>
                               <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() =>
+                                  handleDeleteRequest(request?._id)
+                                }
                                 className="btn btn-ghost btn-xs text-gray-500 hover:text-error tooltip tooltip-warning"
                                 data-tip="Delete"
                               >
@@ -250,12 +351,22 @@ const RecentRequests = () => {
                           {request?.status?.current === "inprogress" && (
                             <>
                               <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() =>
+                                  handleCompleteRequest(request?._id)
+                                }
                                 className="btn btn-ghost btn-xs text-success hover:text-success tooltip tooltip-success"
                                 data-tip="Complete"
                               >
                                 <baseConfig.icons.check className="w-3 h-3 md:w-4 md:h-4" />
                               </motion.button>
                               <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() =>
+                                  handleCancelRequest(request?._id)
+                                }
                                 className="btn btn-ghost btn-xs text-error hover:text-error tooltip tooltip-warning"
                                 data-tip="Cancel"
                               >
@@ -274,7 +385,7 @@ const RecentRequests = () => {
         </div>
       )}
 
-      {/* Modals */}
+      {/* Request Details Modal */}
       <AnimatePresence>
         {isDetailsModalOpen && (
           <div className="modal modal-middle modal-open">
@@ -286,7 +397,7 @@ const RecentRequests = () => {
                   closeModal={() => setIsDetailsModalOpen(false)}
                 />
               )}
-              <div className="modal-action absolute right-4 md:right-7 top-2 -translate-0.5">
+              <div className="modal-action absolute right-7 md:right-7 top-2 -translate-0.5">
                 <CloseBtn onClick={() => setIsDetailsModalOpen(false)} />
               </div>
             </div>

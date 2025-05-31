@@ -47,7 +47,7 @@ const DonationRequestCard = ({ request, onViewDetails }) => {
   } = request;
 
   const urgencyConfig = getUrgencyConfig(donationInfo?.urgency);
-  const statusConfig = getStatusConfig(status);
+  const statusConfig = getStatusConfig(status?.current);
   const bloodGroupConfig = getBloodGroupConfig(donationInfo?.bloodGroup);
 
   return (
